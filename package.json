@@ -1,0 +1,33 @@
+{
+    "name": "calendar",
+    "version": "1.0.0",
+    "description": "Calendar App",
+    "main": "index.js",
+    "scripts": {
+        "devserver": "nodemon ./server/server.js",
+        "test": "echo \"Error: no test specified\" && exit 1"
+    },
+    "keywords": [
+        "Calendar"
+    ],
+    "author": "coolnik",
+    "license": "ISC",
+    "repository": {
+        "type": "git",
+        "url": "https://github.com/nikhilmate/calenderUI.git"
+    },
+    "dependencies": {
+        "bcrypt": "^5.0.0",
+        "bluebird": "^3.7.2",
+        "body-parser": "^1.19.0",
+        "connect-multiparty": "^2.2.0",
+        "cors": "^2.8.5",
+        "express": "^4.17.1",
+        "path": "^0.12.7",
+        "sequelize": "^6.3.4",
+        "sqlite3": "^5.0.0"
+    },
+    "devDependencies": {
+        "nodemon": "^1.18.10"
+    }
+}
