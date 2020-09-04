@@ -1,19 +1,53 @@
-module.exports = (app) => {
+const loginValidation = require('../utils').loginValidation;
+const isPasswordAndUserMatch = require('../middlewares/authController')
+    .isPasswordAndUserMatch;
+
+module.exports = (app, directorypath, passport) => {
     const user = require('../controllers/UserController.js');
 
     var router = require('express').Router();
 
     // Create User
-    router.post('/create', user.create);
+    router.post('/register', user.create);
+
+    // login User
+    router.post(
+        '/login',
+        [loginValidation, isPasswordAndUserMatch],
+        user.login
+    );
 
     // Retrieve user
-    router.get('/getUser/:email', user.getUser);
+    router.get(
+        '/isLogged/:email',
+        passport.authenticate('jwt', {
+            session: false,
+            failureRedirect: '/api/user/notLogged',
+        }),
+        user.isLogged
+    );
+
+    router.get('/notLogged', user.notLogged);
 
     // Update User
-    router.post('/update/:email', user.update);
+    router.post(
+        '/update/:email',
+        passport.authenticate('jwt', {
+            session: false,
+            failureRedirect: '/api/user/notLogged',
+        }),
+        user.update
+    );
 
     // Delete User
-    router.post('/delete/:email', user.delete);
+    router.get(
+        '/delete/:email',
+        passport.authenticate('jwt', {
+            session: false,
+            failureRedirect: '/api/user/notLogged',
+        }),
+        user.delete
+    );
 
     app.use('/api/user', router);
 };

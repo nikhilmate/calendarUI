@@ -1,229 +1,263 @@
 //user.js
 const User = require('../models').User;
-function validateEmail(email) {
-    const re = /^(([^<>()[\]\\.,;:\s@\"]+(\.[^<>()[\]\\.,;:\s@\"]+)*)|(\".+\"))@((\[[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\.[0-9]{1,3}\])|(([a-zA-Z\-0-9]+\.)+[a-zA-Z]{2,}))$/;
-    return re.test(email);
-}
+const jwt = require('jsonwebtoken');
+const validationResult = require('express-validator').validationResult;
+const check = require('express-validator').check;
+// const generateCryptPassword = require('../utils').generateCryptPassword;
+const bcrypt = require('bcrypt');
+
+// The verifying public key
+const PRIV_KEY = require('../utils').PRIV_KEY;
+
 module.exports = {
-    async getUser(req, res) {
+    async isLogged(req, res) {
         let { email } = req.params;
-        if (validateEmail(email)) {
-            try {
-                await User.findOne({
-                    where: {
-                        email: req.params.email,
-                    },
-                }).then((findInstance) => {
-                    if (!!findInstance) {
-                        return res.status(200).send({
-                            status: true,
-                            user: findInstance,
-                        });
-                    } else {
-                        return res.status(200).send({
-                            status: false,
-                            user: null,
-                            message: 'Could not found',
-                        });
-                    }
-                });
-            } catch (e) {
-                console.log(e);
-                return res.status(500).send({
-                    status: false,
-                    user: null,
-                    message: e,
-                });
-            }
-        } else {
-            return res.status(500).send({
-                status: true,
-                user: false,
-                message: 'Wrong mail entered',
-            });
-        }
+        return res.status(200).json({
+            success: true,
+            user: {
+                email: email,
+            },
+        });
+    },
+    async notLogged(req, res) {
+        return res.status(200).json({
+            success: false,
+            errors: ['User is not logged'],
+        });
     },
 
     async create(req, res) {
-        let { email, password } = req.body;
-        if (
-            validateEmail(email) &&
-            typeof password == 'string' &&
-            password.trim()
-        ) {
+        await check('email').isEmail().run(req);
+        await check('password').isLength({ min: 6 }).run(req);
+
+        const result = validationResult(req);
+        if (!result.isEmpty()) {
+            return res
+                .status(400)
+                .json({ success: false, errors: result.array() });
+        } else {
+            let { email, password } = req.body;
             try {
-                await User.findOne({
+                let findInstance = await User.findOne({
                     where: {
                         email: email,
                     },
-                }).then((findInstance) => {
-                    if (!!findInstance) {
-                        return res.status(404).send({
-                            status: false,
-                            user: findInstance,
-                            message: 'Already have user',
-                        });
-                    } else {
-                        return User.create({
-                            email: email,
-                            password: password,
-                        }).then((createInstance) => {
-                            if (!!createInstance) {
-                                return res.status(201).send({
-                                    status: true,
-                                    user: createInstance,
-                                });
-                            } else {
-                                return res.status(500).send({
-                                    status: false,
-                                    user: null,
-                                    message: 'Could not create user',
-                                });
-                            }
-                        });
-                    }
                 });
+                if (!!findInstance) {
+                    return res.status(403).json({
+                        success: false,
+                        errors: ['Already have user'],
+                    });
+                } else {
+                    let plainPassword = password;
+                    bcrypt.genSalt(10, function (err, salt) {
+                        if (err) {
+                            console.log(err);
+                            return res.status(403).json({
+                                success: false,
+                                errors: [
+                                    'Could not create user',
+                                    'could not save credentials',
+                                ],
+                            });
+                        } else {
+                            bcrypt.hash(plainPassword, salt, function (
+                                err,
+                                hash
+                            ) {
+                                if (err) {
+                                    console.log(err);
+                                    return res.status(403).json({
+                                        success: false,
+                                        errors: [
+                                            'Could not create user',
+                                            'could not save credentials',
+                                        ],
+                                    });
+                                } else {
+                                    User.create({
+                                        email: email,
+                                        password: hash,
+                                    }).then((createInstance) => {
+                                        if (!!createInstance) {
+                                            let token = jwt.sign(
+                                                { email: email },
+                                                PRIV_KEY,
+                                                {
+                                                    expiresIn: '1d',
+                                                    algorithm: 'RS256',
+                                                }
+                                            );
+                                            delete createInstance['password'];
+                                            return res.status(201).json({
+                                                success: true,
+                                                user: createInstance,
+                                                token: 'Bearer ' + token,
+                                            });
+                                        } else {
+                                            return res.status(403).json({
+                                                success: false,
+                                                errors: [
+                                                    'Could not create user',
+                                                ],
+                                            });
+                                        }
+                                    });
+                                }
+                            });
+                        }
+                    });
+                }
             } catch (e) {
                 console.log(e);
-                return res.status(500).send({
-                    status: false,
-                    user: null,
-                    message: e,
+                return res.status(401).json({
+                    success: false,
+                    errors: e,
                 });
             }
-        } else {
-            return res.status(500).send({
-                status: false,
-                user: false,
-                message: 'Wrong detalis entered',
+        }
+    },
+
+    async login(req, res) {
+        try {
+            let token = jwt.sign({ email: req.body.email }, PRIV_KEY, {
+                expiresIn: '1d',
+                algorithm: 'RS256',
+            });
+            return res.status(201).json({
+                success: true,
+                user: req.body,
+                token: 'Bearer ' + token,
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(401).json({
+                success: false,
+                errors: e,
             });
         }
     },
 
     async update(req, res) {
         let { email, password } = req.body;
-        let sourceEmail = req.params.email;
-        email = !!email ? email : sourceEmail;
-        if (validateEmail(sourceEmail) && validateEmail(email)) {
-            try {
-                await User.findOne({
-                    where: {
-                        email: sourceEmail,
-                    },
-                })
-                    .then((findInstance) => {
-                        if (!!findInstance) {
-                            return User.update(
+        let cur_email = req.user.email,
+            cur_password = req.user.password;
+        // return res.status(200).json({
+        //     success: true,
+        //     user: req.user,
+        //     message: {
+        //         email,
+        //         password,
+        //     },
+        // });
+        try {
+            let plainPassword = password ? password : cur_password,
+                newEmail = email ? email : cur_email;
+            bcrypt.genSalt(10, function (err, salt) {
+                if (err) {
+                    console.log(err);
+                    return res.status(403).json({
+                        success: false,
+                        errors: [
+                            'Could not update user',
+                            'could not update credentials',
+                        ],
+                    });
+                } else {
+                    bcrypt.hash(plainPassword, salt, function (err, hash) {
+                        if (err) {
+                            console.log(err);
+                            return res.status(403).json({
+                                success: false,
+                                errors: [
+                                    'Could not update user',
+                                    'could not update credentials',
+                                ],
+                            });
+                        } else {
+                            User.update(
                                 {
-                                    email: email,
-                                    password: password
-                                        ? password
-                                        : findInstance.password,
+                                    email: newEmail,
+                                    password: hash,
                                 },
                                 {
                                     where: {
-                                        email: sourceEmail,
+                                        email: cur_email,
                                     },
                                 }
-                            );
-                        } else {
-                            return res.status(404).send({
-                                status: false,
-                                user: null,
-                                message: 'User not found',
+                            ).then((updateInstance) => {
+                                User.findOne({
+                                    where: {
+                                        email: newEmail,
+                                    },
+                                }).then((updatedUser) => {
+                                    if (!!updatedUser) {
+                                        delete updatedUser['password'];
+                                        let token = jwt.sign(
+                                            { email: newEmail },
+                                            PRIV_KEY,
+                                            {
+                                                expiresIn: '1d',
+                                                algorithm: 'RS256',
+                                            }
+                                        );
+                                        return res.status(201).json({
+                                            success: true,
+                                            user: updatedUser,
+                                            token: 'Bearer ' + token,
+                                        });
+                                    } else {
+                                        return res.status(403).json({
+                                            success: false,
+                                            errors: [
+                                                'Could not get updated user',
+                                            ],
+                                        });
+                                    }
+                                });
                             });
                         }
-                    })
-                    .then((updateInstance) => {
-                        User.findOne({
-                            where: {
-                                email: email,
-                            },
-                        }).then((updatedUser) => {
-                            if (!!updatedUser) {
-                                return res.status(201).send({
-                                    status: true,
-                                    user: updatedUser,
-                                });
-                            } else {
-                                return res.status(502).send({
-                                    status: false,
-                                    user: false,
-                                    message: 'Could not get updated user',
-                                });
-                            }
-                        });
                     });
-            } catch (e) {
-                console.log(e);
-                return res.status(500).send({
-                    status: false,
-                    user: null,
-                    message: e,
-                });
-            }
-        } else {
-            return res.status(500).send({
-                status: false,
-                user: false,
-                message: 'Wrong detalis entered',
+                }
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(401).json({
+                success: false,
+                errors: e,
             });
         }
     },
 
     async delete(req, res) {
-        let sourceEmail = req.params.email;
-        if (validateEmail(sourceEmail)) {
-            try {
-                await User.findOne({
-                    where: {
-                        email: sourceEmail,
-                    },
-                }).then((findInstance) => {
-                    if (!!findInstance) {
-                        return User.destroy({
-                            where: {
-                                email: sourceEmail,
-                            },
-                            truncate: false,
-                        }).then((destroyInstance) => {
-                            if (!!destroyInstance) {
-                                return res.status(200).send({
-                                    status: true,
-                                    user: findInstance,
-                                    message: `User deleted successfully!`,
-                                });
-                            } else {
-                                return res.status(200).send({
-                                    status: false,
-                                    user: false,
-                                    message:
-                                        err.message ||
-                                        'Some error occurred while deleting user.',
-                                });
-                            }
-                        });
-                    } else {
-                        return res.status(404).send({
-                            status: false,
-                            user: null,
-                            message: 'User not found',
-                        });
-                    }
-                });
-            } catch (e) {
-                console.log(e);
-                return res.status(500).send({
-                    status: false,
-                    user: false,
-                    message: e,
-                });
-            }
-        } else {
-            return res.status(500).send({
-                status: false,
-                user: false,
-                message: 'Wrong email',
+        let cur_email = req.user.email;
+        try {
+            return User.destroy({
+                where: {
+                    email: cur_email,
+                },
+                truncate: false,
+            }).then((destroyInstance) => {
+                if (!!destroyInstance) {
+                    return res.status(200).json({
+                        success: true,
+                        user: cur_email,
+                        message: [`User deleted successfully!`],
+                    });
+                } else {
+                    return res.status(200).json({
+                        success: false,
+                        errors: err.message || [
+                            'Some error occurred while deleting user.',
+                        ],
+                    });
+                }
+            });
+        } catch (e) {
+            console.log(e);
+            return res.status(401).json({
+                success: false,
+                errors: e,
             });
         }
     },

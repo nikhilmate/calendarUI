@@ -9,11 +9,11 @@ module.exports = (app, directory) => {
         });
     });
 
-    router.get('/api', (req, res) => {
-        res.sendStatus(200).send({
-            data: 'Calendar API v1',
-        });
-    });
+    // router.get('/api', (req, res) => {
+    //     res.sendStatus(200).send({
+    //         data: 'Calendar API v1',
+    //     });
+    // });
 
     app.use('/', router);
 };
