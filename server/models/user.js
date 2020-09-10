@@ -1,5 +1,7 @@
 'use strict';
-const { Model, Op } = require('sequelize');
+const { Model, Op, Sequelize } = require('sequelize');
+const { v4: uuidV4 } = require('uuid');
+const CreateUserObj = require('../utils').CreateUserObj;
 
 module.exports = (sequelize, DataTypes) => {
     class User extends Model {
@@ -10,18 +12,22 @@ module.exports = (sequelize, DataTypes) => {
          */
         static associate(models) {
             // define association here
+            User.hasMany(models.Task, {
+                as: 'tasks',
+                sourceKey: 'email',
+                foreignKey: 'user_email',
+                onUpdate: 'CASCADE',
+                onDelete: 'NO ACTION'
+            });
         }
     }
-    User.init(
-        {
-            email: DataTypes.STRING,
-            password: DataTypes.STRING,
-        },
-        {
-            sequelize,
-            timestamps: true,
-            modelName: 'User',
-        }
-    );
+    User.init(CreateUserObj(DataTypes), {
+        sequelize,
+        timestamps: true,
+        modelName: 'User'
+    });
+    User.beforeCreate((user, options) => {
+        user.id = uuidV4();
+    });
     return User;
 };

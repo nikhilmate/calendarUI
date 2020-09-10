@@ -3,26 +3,39 @@ const User = require('../models').User;
 const jwt = require('jsonwebtoken');
 const validationResult = require('express-validator').validationResult;
 const check = require('express-validator').check;
-// const generateCryptPassword = require('../utils').generateCryptPassword;
 const bcrypt = require('bcrypt');
 
 // The verifying public key
 const PRIV_KEY = require('../utils').PRIV_KEY;
 
+const deletePrivateDetails = (userDetails) => {
+    if (typeof userDetails == 'object') {
+        delete userDetails['password'];
+        delete userDetails['id'];
+    }
+    return userDetails;
+};
+
 module.exports = {
     async isLogged(req, res) {
-        let { email } = req.params;
-        return res.status(200).json({
-            success: true,
-            user: {
-                email: email,
-            },
-        });
+        try {
+            let userDetails = Object.assign({}, req.user.get());
+            userDetails = Object.assign({}, deletePrivateDetails(userDetails));
+            return res.status(200).json({
+                success: true,
+                user: userDetails
+            });
+        } catch (error) {
+            return res.status(401).json({
+                success: false,
+                errors: ['Server issue']
+            });
+        }
     },
     async notLogged(req, res) {
-        return res.status(200).json({
+        return res.status(401).json({
             success: false,
-            errors: ['User is not logged'],
+            errors: ['User is not logged']
         });
     },
 
@@ -40,13 +53,13 @@ module.exports = {
             try {
                 let findInstance = await User.findOne({
                     where: {
-                        email: email,
-                    },
+                        email: email
+                    }
                 });
                 if (!!findInstance) {
                     return res.status(403).json({
                         success: false,
-                        errors: ['Already have user'],
+                        errors: ['Already have user']
                     });
                 } else {
                     let plainPassword = password;
@@ -57,8 +70,8 @@ module.exports = {
                                 success: false,
                                 errors: [
                                     'Could not create user',
-                                    'could not save credentials',
-                                ],
+                                    'could not save credentials'
+                                ]
                             });
                         } else {
                             bcrypt.hash(plainPassword, salt, function (
@@ -71,13 +84,13 @@ module.exports = {
                                         success: false,
                                         errors: [
                                             'Could not create user',
-                                            'could not save credentials',
-                                        ],
+                                            'could not save credentials'
+                                        ]
                                     });
                                 } else {
                                     User.create({
                                         email: email,
-                                        password: hash,
+                                        password: hash
                                     }).then((createInstance) => {
                                         if (!!createInstance) {
                                             let token = jwt.sign(
@@ -85,21 +98,30 @@ module.exports = {
                                                 PRIV_KEY,
                                                 {
                                                     expiresIn: '1d',
-                                                    algorithm: 'RS256',
+                                                    algorithm: 'RS256'
                                                 }
                                             );
-                                            delete createInstance['password'];
+                                            let userDetails = Object.assign(
+                                                {},
+                                                createInstance.get()
+                                            );
+                                            userDetails = Object.assign(
+                                                {},
+                                                deletePrivateDetails(
+                                                    userDetails
+                                                )
+                                            );
                                             return res.status(201).json({
                                                 success: true,
-                                                user: createInstance,
-                                                token: 'Bearer ' + token,
+                                                user: userDetails,
+                                                token: 'Bearer ' + token
                                             });
                                         } else {
                                             return res.status(403).json({
                                                 success: false,
                                                 errors: [
-                                                    'Could not create user',
-                                                ],
+                                                    'Could not create user'
+                                                ]
                                             });
                                         }
                                     });
@@ -112,7 +134,7 @@ module.exports = {
                 console.log(e);
                 return res.status(401).json({
                     success: false,
-                    errors: e,
+                    errors: e
                 });
             }
         }
@@ -120,39 +142,32 @@ module.exports = {
 
     async login(req, res) {
         try {
+            let userDetails = Object.assign({}, req.body);
+            userDetails = Object.assign({}, deletePrivateDetails(userDetails));
             let token = jwt.sign({ email: req.body.email }, PRIV_KEY, {
                 expiresIn: '1d',
-                algorithm: 'RS256',
+                algorithm: 'RS256'
             });
             return res.status(201).json({
                 success: true,
-                user: req.body,
-                token: 'Bearer ' + token,
+                user: userDetails,
+                token: 'Bearer ' + token
             });
         } catch (e) {
             console.log(e);
             return res.status(401).json({
                 success: false,
-                errors: e,
+                errors: e
             });
         }
     },
 
     async update(req, res) {
-        let { email, password } = req.body;
+        let { password } = req.body;
         let cur_email = req.user.email,
             cur_password = req.user.password;
-        // return res.status(200).json({
-        //     success: true,
-        //     user: req.user,
-        //     message: {
-        //         email,
-        //         password,
-        //     },
-        // });
         try {
-            let plainPassword = password ? password : cur_password,
-                newEmail = email ? email : cur_email;
+            let plainPassword = password ? password : cur_password;
             bcrypt.genSalt(10, function (err, salt) {
                 if (err) {
                     console.log(err);
@@ -160,8 +175,8 @@ module.exports = {
                         success: false,
                         errors: [
                             'Could not update user',
-                            'could not update credentials',
-                        ],
+                            'could not update credentials'
+                        ]
                     });
                 } else {
                     bcrypt.hash(plainPassword, salt, function (err, hash) {
@@ -171,50 +186,65 @@ module.exports = {
                                 success: false,
                                 errors: [
                                     'Could not update user',
-                                    'could not update credentials',
-                                ],
+                                    'could not update credentials'
+                                ]
                             });
                         } else {
                             User.update(
                                 {
-                                    email: newEmail,
-                                    password: hash,
+                                    password: hash
                                 },
                                 {
-                                    where: {
-                                        email: cur_email,
-                                    },
+                                    where: { email: cur_email }
                                 }
                             ).then((updateInstance) => {
-                                User.findOne({
-                                    where: {
-                                        email: newEmail,
-                                    },
-                                }).then((updatedUser) => {
-                                    if (!!updatedUser) {
-                                        delete updatedUser['password'];
-                                        let token = jwt.sign(
-                                            { email: newEmail },
-                                            PRIV_KEY,
-                                            {
-                                                expiresIn: '1d',
-                                                algorithm: 'RS256',
-                                            }
-                                        );
-                                        return res.status(201).json({
-                                            success: true,
-                                            user: updatedUser,
-                                            token: 'Bearer ' + token,
-                                        });
-                                    } else {
-                                        return res.status(403).json({
-                                            success: false,
-                                            errors: [
-                                                'Could not get updated user',
-                                            ],
-                                        });
-                                    }
-                                });
+                                if (
+                                    !!updateInstance &&
+                                    typeof updateInstance[0] === 'number' &&
+                                    updateInstance[0] > 0
+                                ) {
+                                    User.findOne({
+                                        where: { email: cur_email }
+                                    }).then((updatedUser) => {
+                                        if (!!updatedUser) {
+                                            let userDetails = Object.assign(
+                                                {},
+                                                updatedUser.get()
+                                            );
+                                            userDetails = Object.assign(
+                                                {},
+                                                deletePrivateDetails(
+                                                    userDetails
+                                                )
+                                            );
+                                            let token = jwt.sign(
+                                                { email: cur_email },
+                                                PRIV_KEY,
+                                                {
+                                                    expiresIn: '1d',
+                                                    algorithm: 'RS256'
+                                                }
+                                            );
+                                            return res.status(201).json({
+                                                success: true,
+                                                user: userDetails,
+                                                token: 'Bearer ' + token
+                                            });
+                                        } else {
+                                            return res.status(403).json({
+                                                success: false,
+                                                errors: [
+                                                    'Could not get updated user'
+                                                ]
+                                            });
+                                        }
+                                    });
+                                } else {
+                                    return res.status(401).json({
+                                        success: false,
+                                        errors: ['Update failed']
+                                    });
+                                }
                             });
                         }
                     });
@@ -224,7 +254,7 @@ module.exports = {
             console.log(e);
             return res.status(401).json({
                 success: false,
-                errors: e,
+                errors: e
             });
         }
     },
@@ -234,22 +264,24 @@ module.exports = {
         try {
             return User.destroy({
                 where: {
-                    email: cur_email,
+                    email: cur_email
                 },
-                truncate: false,
+                truncate: false
             }).then((destroyInstance) => {
-                if (!!destroyInstance) {
+                if (
+                    !!destroyInstance &&
+                    typeof destroyInstance[0] === 'number' &&
+                    destroyInstance[0] > 0
+                ) {
                     return res.status(200).json({
                         success: true,
                         user: cur_email,
-                        message: [`User deleted successfully!`],
+                        message: [`User deleted successfully`]
                     });
                 } else {
                     return res.status(200).json({
                         success: false,
-                        errors: err.message || [
-                            'Some error occurred while deleting user.',
-                        ],
+                        errors: ['Some error occurred while deleting user']
                     });
                 }
             });
@@ -257,8 +289,8 @@ module.exports = {
             console.log(e);
             return res.status(401).json({
                 success: false,
-                errors: e,
+                errors: e
             });
         }
-    },
+    }
 };

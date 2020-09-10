@@ -7,14 +7,14 @@ const bcrypt = require('bcrypt');
 module.exports = {
     isPasswordAndUserMatch(req, res, next) {
         var { email, password } = req.body;
-        User.findOne({ where: { email } }).then(function (user) {
-            if (!user) {
+        User.findOne({ where: { email } }).then(function (userInstance) {
+            if (!userInstance) {
                 return res.status(400).json({
                     success: false,
-                    errors: ['Incorrect email.'],
+                    errors: ['Incorrect email.']
                 });
             } else {
-                bcrypt.compare(password, user.password, function (
+                bcrypt.compare(password, userInstance.password, function (
                     err,
                     isMatch
                 ) {
@@ -22,17 +22,18 @@ module.exports = {
                         console.log(err);
                         return res.status(400).json({
                             success: false,
-                            errors: ['Could not match credentials'],
+                            errors: ['Could not match credentials']
                         });
                     } else if (!isMatch) {
                         return res.status(400).json({
                             success: false,
-                            errors: ['Invalid password'],
+                            errors: ['Invalid password']
                         });
                     } else {
-                        req.body = {
-                            email: email,
-                        };
+                        let _user = Object.assign({}, userInstance.get());
+                        delete _user['password'];
+                        delete _user['id'];
+                        req.body = Object.assign({}, _user);
                         return next();
                     }
                 });
@@ -56,7 +57,7 @@ module.exports = {
                     if (err) {
                         return res.sendStatus(400).json({
                             success: false,
-                            errors: ['Failed to authenticate token.'],
+                            errors: ['Failed to authenticate token.']
                         });
                     } else {
                         // if everything is good, save to request for use in other routes
@@ -70,7 +71,7 @@ module.exports = {
             // return an error
             return res.sendStatus(400).json({
                 success: false,
-                errors: ['No token provided.'],
+                errors: ['No token provided.']
             });
         }
     },
@@ -82,7 +83,7 @@ module.exports = {
                 if (authorization[0] !== 'Bearer') {
                     return res.sendStatus(403).json({
                         success: false,
-                        errors: ['Wrong token provided.'],
+                        errors: ['Wrong token provided.']
                     });
                 } else {
                     req.jwt = jwt.verify(
@@ -94,14 +95,14 @@ module.exports = {
             } catch (err) {
                 return res.sendStatus(400).json({
                     success: false,
-                    errors: err,
+                    errors: err
                 });
             }
         } else {
             return res.sendStatus(400).json({
                 success: false,
-                errors: ['Token needed'],
+                errors: ['Token needed']
             });
         }
-    },
+    }
 };

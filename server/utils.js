@@ -20,8 +20,76 @@ module.exports = {
             .exists()
             .withMessage('PASSWORD_IS_EMPTY')
             .isLength({ min: 6 })
-            .withMessage('PASSWORD_LENGTH_MUST_BE_MORE_THAN_8'),
+            .withMessage('PASSWORD_LENGTH_MUST_BE_MORE_THAN_8')
     ],
     PUB_KEY,
     PRIV_KEY,
+    CreateTaskObj(Sequelize) {
+        return {
+            id: {
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
+                allowNull: false,
+                primaryKey: true
+            },
+            description: {
+                type: Sequelize.TEXT,
+                allowNull: false
+            },
+            timestamp: {
+                type: Sequelize.STRING,
+                allowNull: false
+            },
+            // dateUtil: {
+            //     type: Sequelize.STRING,
+            //     allowNull: false
+            // },
+            // timeUtil: {
+            //     type: Sequelize.STRING,
+            //     allowNull: false
+            // },
+            isFinished: {
+                type: Sequelize.STRING,
+                allowNull: false
+            },
+            user_email: {
+                type: Sequelize.STRING,
+                allowNull: false
+            },
+            createdAt: {
+                allowNull: false,
+                type: Sequelize.DATE
+            },
+            updatedAt: {
+                allowNull: false,
+                type: Sequelize.DATE
+            }
+        };
+    },
+    CreateUserObj(Sequelize) {
+        return {
+            id: {
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
+                allowNull: false
+            },
+            email: {
+                allowNull: false,
+                primaryKey: true,
+                type: Sequelize.STRING
+            },
+            password: {
+                allowNull: false,
+                type: Sequelize.STRING
+            },
+            createdAt: {
+                allowNull: false,
+                type: Sequelize.DATE
+            },
+            updatedAt: {
+                allowNull: false,
+                type: Sequelize.DATE
+            }
+        };
+    }
 };

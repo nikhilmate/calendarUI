@@ -27,6 +27,7 @@ require('./config/passport')(passport);
 
 require('./routes/common_routes.js')(app, __dirname);
 require('./routes/user_routes.js')(app, __dirname, passport);
+require('./routes/task_routes.js')(app, __dirname, passport);
 
 // catch 404 and forward to error handler
 app.use(function (req, res, next) {
