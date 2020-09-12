@@ -21,4 +21,6 @@ $ openssl rsa -in private.pem -pubout -out public.pem
 
 $ cd ..
 
+$ npm run build
+
 $ npm run devserver
