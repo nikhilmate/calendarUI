@@ -4,7 +4,11 @@
     "description": "Calendar App",
     "main": "index.js",
     "scripts": {
+        "start": "webpack --mode=development",
+        "build": "webpack --mode=production",
+        "uiserver": "webpack-dev-server",
         "devserver": "nodemon ./server/server.js",
+        "prod:host": "node /server/server.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [
@@ -29,12 +33,25 @@
         "passport": "^0.4.1",
         "passport-jwt": "^4.0.0",
         "path": "^0.12.7",
+        "react": "^16.13.1",
+        "react-dom": "^16.13.1",
         "sequelize": "^6.3.4",
         "sqlite3": "^5.0.0",
         "uuid": "^8.3.0",
         "winston": "^3.3.3"
     },
     "devDependencies": {
-        "nodemon": "^1.18.10"
+        "@babel/core": "^7.11.6",
+        "@babel/preset-env": "^7.11.5",
+        "@babel/preset-react": "^7.10.4",
+        "babel-loader": "^8.1.0",
+        "css-loader": "^4.3.0",
+        "file-loader": "^6.1.0",
+        "mini-css-extract-plugin": "^0.11.1",
+        "nodemon": "^1.18.10",
+        "style-loader": "^1.2.1",
+        "webpack": "^4.44.1",
+        "webpack-cli": "^3.3.12",
+        "webpack-dev-server": "^3.11.0"
     }
 }
