@@ -19,12 +19,21 @@ module.exports = (app, directorypath, passport) => {
 
     // Retrieve user
     router.get(
-        '/isLogged/:email',
+        '/isLogged',
         passport.authenticate('jwt', {
             session: false,
-            failureRedirect: '/api/user/notLogged',
+            failureRedirect: '/api/user/notLogged'
         }),
         user.isLogged
+    );
+
+    router.get(
+        '/logout',
+        passport.authenticate('jwt', {
+            session: false,
+            failureRedirect: '/api/user/notLogged'
+        }),
+        user.logout
     );
 
     router.get('/notLogged', user.notLogged);
@@ -34,7 +43,7 @@ module.exports = (app, directorypath, passport) => {
         '/update/:email',
         passport.authenticate('jwt', {
             session: false,
-            failureRedirect: '/api/user/notLogged',
+            failureRedirect: '/api/user/notLogged'
         }),
         user.update
     );
@@ -44,7 +53,7 @@ module.exports = (app, directorypath, passport) => {
         '/delete/:email',
         passport.authenticate('jwt', {
             session: false,
-            failureRedirect: '/api/user/notLogged',
+            failureRedirect: '/api/user/notLogged'
         }),
         user.delete
     );

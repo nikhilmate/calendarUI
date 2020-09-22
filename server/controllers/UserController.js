@@ -19,11 +19,13 @@ const deletePrivateDetails = (userDetails) => {
 module.exports = {
     async isLogged(req, res) {
         try {
-            let userDetails = Object.assign({}, req.user.get());
+            let userDetails = Object.assign({}, req.user.get()),
+                tasks = await req.user.getTasks();
             userDetails = Object.assign({}, deletePrivateDetails(userDetails));
             return res.status(200).json({
                 success: true,
-                user: userDetails
+                user: userDetails,
+                tasks
             });
         } catch (error) {
             return res.status(401).json({
@@ -36,6 +38,20 @@ module.exports = {
         return res.status(401).json({
             success: false,
             errors: ['User is not logged']
+        });
+    },
+
+    async logout(req, res) {
+        res.cookie('jwt', '', {
+            httpOnly: true,
+            sameSite: true,
+            expires: new Date()
+        });
+        return res.status(200).json({
+            success: true,
+            user: {
+                email: req.user.email
+            }
         });
     },
 
@@ -111,6 +127,11 @@ module.exports = {
                                                     userDetails
                                                 )
                                             );
+                                            res.cookie('jwt', token, {
+                                                httpOnly: true,
+                                                sameSite: true,
+                                                expires: 0
+                                            });
                                             return res.status(201).json({
                                                 success: true,
                                                 user: userDetails,
@@ -134,7 +155,7 @@ module.exports = {
                 console.log(e);
                 return res.status(401).json({
                     success: false,
-                    errors: e
+                    errors: ['trouble getting the data']
                 });
             }
         }
@@ -148,6 +169,11 @@ module.exports = {
                 expiresIn: '1d',
                 algorithm: 'RS256'
             });
+            res.cookie('jwt', token, {
+                httpOnly: true,
+                sameSite: true,
+                expires: 0
+            });
             return res.status(201).json({
                 success: true,
                 user: userDetails,
@@ -157,7 +183,7 @@ module.exports = {
             console.log(e);
             return res.status(401).json({
                 success: false,
-                errors: e
+                errors: ['trouble getting the data']
             });
         }
     },
@@ -225,6 +251,11 @@ module.exports = {
                                                     algorithm: 'RS256'
                                                 }
                                             );
+                                            res.cookie('jwt', token, {
+                                                httpOnly: true,
+                                                sameSite: true,
+                                                expires: 0
+                                            });
                                             return res.status(201).json({
                                                 success: true,
                                                 user: userDetails,
@@ -254,7 +285,7 @@ module.exports = {
             console.log(e);
             return res.status(401).json({
                 success: false,
-                errors: e
+                errors: ['trouble getting the data']
             });
         }
     },
@@ -273,6 +304,11 @@ module.exports = {
                     typeof destroyInstance[0] === 'number' &&
                     destroyInstance[0] > 0
                 ) {
+                    res.cookie('jwt', {
+                        httpOnly: true,
+                        sameSite: true,
+                        expires: new Date()
+                    });
                     return res.status(200).json({
                         success: true,
                         user: cur_email,
@@ -289,7 +325,7 @@ module.exports = {
             console.log(e);
             return res.status(401).json({
                 success: false,
-                errors: e
+                errors: ['trouble getting the data']
             });
         }
     }

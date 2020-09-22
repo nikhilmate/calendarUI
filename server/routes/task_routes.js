@@ -1,4 +1,4 @@
-module.exports = (app, directorypath, passport) => {
+module.exports = (app, passport) => {
     const task = require('../controllers/TaskController.js');
 
     var router = require('express').Router();

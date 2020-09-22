@@ -9,16 +9,22 @@ const pathToKey = path.join(__dirname, '../../keys', 'public.pem');
 // The verifying public key
 const PUB_KEY = fs.readFileSync(pathToKey, 'utf8');
 
+const cookieExtractor = (req) => {
+    var token = null;
+    if (req && req.cookies) token = req.cookies['jwt'];
+    return token;
+};
+
 const User = require('../models').User;
 module.exports = (passport) => {
     const options = {
-        jwtFromRequest: ExtractJwt.fromAuthHeaderAsBearerToken(),
+        jwtFromRequest: cookieExtractor,
         secretOrKey: PUB_KEY,
         algorithms: ['RS256'],
         jsonWebTokenOptions: {
-            maxAge: '1d',
+            maxAge: '1d'
         },
-        passReqToCallback: true,
+        passReqToCallback: true
     };
     passport.use(
         new Strategy(options, (req, payload, done) => {
@@ -26,7 +32,7 @@ module.exports = (passport) => {
                 .then(function (user) {
                     if (!user) {
                         return done(null, false, {
-                            errors: ['Incorrect email.'],
+                            errors: ['Incorrect email.']
                         });
                     }
                     req.user = user;

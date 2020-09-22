@@ -4,11 +4,11 @@
     "description": "Calendar App",
     "main": "index.js",
     "scripts": {
-        "start": "webpack --mode=development",
+        "dev": "webpack --mode=development",
         "build": "webpack --mode=production",
         "uiserver": "webpack-dev-server",
         "devserver": "nodemon ./server/server.js",
-        "prod:host": "node /server/server.js",
+        "prod:host": "node ./server/server.js",
         "test": "echo \"Error: no test specified\" && exit 1"
     },
     "keywords": [
@@ -27,7 +27,9 @@
         "body-parser": "^1.19.0",
         "compression": "^1.7.4",
         "connect-multiparty": "^2.2.0",
+        "cookie-parser": "^1.4.5",
         "cors": "^2.8.5",
+        "csurf": "^1.11.0",
         "express": "^4.17.1",
         "express-validator": "^6.6.1",
         "passport": "^0.4.1",
@@ -42,6 +44,9 @@
     },
     "devDependencies": {
         "@babel/core": "^7.11.6",
+        "@babel/plugin-proposal-class-properties": "^7.10.4",
+        "@babel/plugin-proposal-object-rest-spread": "^7.11.0",
+        "@babel/plugin-transform-runtime": "^7.11.5",
         "@babel/preset-env": "^7.11.5",
         "@babel/preset-react": "^7.10.4",
         "babel-loader": "^8.1.0",
