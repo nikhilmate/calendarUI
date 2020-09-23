@@ -1,4 +1,3 @@
-// module.exports = () => {
 const express = require('express');
 const bodyParser = require('body-parser');
 const cors = require('cors');
@@ -28,36 +27,15 @@ app.use(csrfProtection);
 app.use(compression());
 app.use(cors(corsOptions));
 
-const jwt = require('jsonwebtoken');
-const PUB_KEY = require('./utils').PUB_KEY;
-
 const logger = require('winston');
 const passport = require('passport');
 
 app.use(passport.initialize());
 require('./config/passport')(passport);
 
-app.get('/', (req, res) => {
-    res.cookie('XSRF-TOKEN', req.csrfToken());
-    var token = null;
-    if (req && req.cookies) {
-        token = req.cookies['jwt'];
-        jwt.verify(token, PUB_KEY, (err, verifiedJwt) => {
-            if (err) {
-                res.cookie('jwt', '', {
-                    httpOnly: true,
-                    sameSite: true,
-                    expires: new Date()
-                });
-            }
-        });
-    }
-    res.sendFile(path.join(__dirname, '..', 'public', 'index.html'));
-});
-
-require('./routes/common_routes.js')(app, staticPath);
-require('./routes/user_routes.js')(app, __dirname, passport, csrfProtection);
-require('./routes/task_routes.js')(app, passport, csrfProtection);
+require('./routes/common_routes.js')(app);
+require('./routes/user_routes.js')(app, __dirname, passport);
+require('./routes/task_routes.js')(app, passport);
 
 app.use(express.static(staticPath));
 

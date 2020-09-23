@@ -4,6 +4,8 @@ const jwt = require('jsonwebtoken');
 const validationResult = require('express-validator').validationResult;
 const check = require('express-validator').check;
 const bcrypt = require('bcrypt');
+const PUB_KEY = require('../utils').PUB_KEY;
+var path = require('path');
 
 // The verifying public key
 const PRIV_KEY = require('../utils').PRIV_KEY;
@@ -17,6 +19,43 @@ const deletePrivateDetails = (userDetails) => {
 };
 
 module.exports = {
+    async mainRoute(req, res) {
+        res.cookie('XSRF-TOKEN', req.csrfToken());
+        var token = null;
+        if (req && req.cookies) {
+            token = req.cookies['jwt'];
+            jwt.verify(token, PUB_KEY, (err, verifiedJwt) => {
+                if (err) {
+                    res.cookie('jwt', '', {
+                        httpOnly: true,
+                        sameSite: true,
+                        expires: new Date()
+                    });
+                }
+                // if (verifiedJwt && verifiedJwt.email) {
+                //     console.log(verifiedJwt);
+                //     let userInstance = await User.findOne({
+                //         where: { email: verifiedJwt.email }
+                //     });
+                //     if (!!userInstance) {
+                //         let tasks = await userInstance.getTasks();
+                //         let userDetails = Object.assign(
+                //             {},
+                //             userInstance.get()
+                //         );
+                //         userDetails = Object.assign(
+                //             {},
+                //             deletePrivateDetails(
+                //                 userDetails
+                //             )
+                //         );
+                //     }
+                // }
+            });
+        }
+        res.sendFile(path.join(__dirname, '../..', 'public', 'index.html'));
+    },
+
     async isLogged(req, res) {
         try {
             let userDetails = Object.assign({}, req.user.get()),

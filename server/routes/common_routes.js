@@ -1,5 +1,8 @@
 module.exports = (app, staticPath) => {
     var router = require('express').Router();
+    const user = require('../controllers/UserController.js');
+
+    router.get('/', user.mainRoute);
 
     router.get('/api', (req, res) => {
         res.status(200).send({
