@@ -1,13 +1,21 @@
 import React from 'react';
 
 import CalendarAction from './CalendarAction';
+import CalendarLoad from './CalendarLoad';
+import CalendarBody from './CalendarBody';
+import TaskUpdate from './TaskUpdate';
 
 const Calendar = (props) => (
-    <div className="calendar__app">
-        <div className="calendar__app-inner">
-            <CalendarAction />
+    <section className="wrap__main-body">
+        <div className="calendar__app comn-content-box">
+            <div className="calendar__app-inner pos-reltv">
+                <CalendarAction />
+                <CalendarLoad />
+                <CalendarBody />
+                <TaskUpdate />
+            </div>
         </div>
-    </div>
+    </section>
 );
 
 export default Calendar;

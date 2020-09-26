@@ -1,0 +1,150 @@
+.wrap__calendar-body {
+    margin-top: 16px;
+    border-radius: 4px;
+    position: relative;
+}
+
+.calender-viewport {
+    table-layout: fixed;
+    width: 100%;
+    border-collapse: collapse;
+}
+
+
+.calender-viewport th {
+    border: 1px solid #d6dbe4;
+}
+
+.calender-viewport td {
+    border: 1px solid #e5eaf2;
+}
+
+.calender__header {
+    background-color: #e0e4eb;
+}
+
+.table__row {
+    display: flex;
+    width: 100%;
+}
+
+.weekday {
+    padding: 16px;
+    height: 56px;
+    font-size: 20px;
+    font-weight: 500;
+    line-height: 1;
+    color: #757e8e;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+}
+
+.comn__cell {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    width: calc(100% / 7);
+}
+
+.calender__body .comn__cell {
+    height: 100px;
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: space-between;
+}
+
+.info-wrap {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    padding: 13px;
+}
+
+.date__text {
+    margin-left: auto;
+    width: 40px;
+    height: 40px;
+    display: inline-flex;
+    justify-content: flex-end;
+    padding-right: 7px;
+    border-radius: 50%;
+    background-color: transparent;
+    align-items: center;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 24px;
+    font-weight: 400;
+    line-height: 1;
+    color: #000;
+}
+
+.static_cell .date__text {
+    color: #cacfd7;
+}
+
+[data-future-day='current-date'] .date__text {
+    background-color: #52a701;
+    color: #fff;
+    justify-content: center;
+    padding: 0;
+}
+
+.plus-ico {
+    display: none;
+    transition: 0.3s all ease;
+    cursor: pointer;
+}
+
+.month_date {
+    transition: 0.4s ease all;
+}
+
+.month_date:hover,
+.month_date.focused {
+    background-color: rgba(239, 243, 249, 0.81);
+}
+
+.month_date:hover .plus-ico,
+.month_date.focused .plus-ico {
+    display: block;
+}
+
+.month_date[data-future-day='old-date']:hover,
+.month_date[data-future-day='old-date'].focused {
+    background-color: #FFF;
+}
+
+.month_date[data-future-day='old-date']:hover .plus-ico,
+.month_date[data-future-day='old-date'].focused .plus-ico {
+    display: none;
+}
+
+.task__status-wrap {
+    margin: 0 0 10px 10px;
+    display: flex;
+    align-items: center;
+}
+
+.view-status-btn {
+    width: 18px;
+    height: 18px;
+    display: inline-flex;
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: top left;
+    cursor: pointer;
+}
+
+.view-status-btn:not(:first-child) {
+    margin-left: 10px;
+}
+
+.view-status-btn[data-task-status='assign'] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cg fill='%23D22525' fill-rule='evenodd'%3E%3Cpath fill-rule='nonzero' d='M14 2h-.667V.667c0-.368-.298-.667-.666-.667H12c-.368 0-.667.299-.667.667V2H4.667V.667C4.667.299 4.368 0 4 0h-.667c-.368 0-.666.299-.666.667V2H2C.897 2 0 2.897 0 4v10c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm0 12.667H2c-.368 0-.667-.299-.667-.667V6.027h13.334V14c0 .368-.299.667-.667.667z'/%3E%3Cpath d='M4.8 8.4H11.2V12.4H4.8z'/%3E%3C/g%3E%3C/svg%3E%0A");
+}
+
+.view-status-btn[data-task-status='completed'] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cg fill='%237F7F7F' fill-rule='evenodd'%3E%3Cpath fill-rule='nonzero' d='M14 2h-.667V.667c0-.368-.298-.667-.666-.667H12c-.368 0-.667.299-.667.667V2H4.667V.667C4.667.299 4.368 0 4 0h-.667c-.368 0-.666.299-.666.667V2H2C.897 2 0 2.897 0 4v10c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm0 12.667H2c-.368 0-.667-.299-.667-.667V6.027h13.334V14c0 .368-.299.667-.667.667z'/%3E%3Cpath d='M4.8 8.4H11.2V12.4H4.8z'/%3E%3C/g%3E%3C/svg%3E%0A");
+}
+
+.view-status-btn[data-task-status='holiday'] {
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='16' height='16' viewBox='0 0 16 16'%3E%3Cg fill='%230953AE' fill-rule='evenodd'%3E%3Cpath fill-rule='nonzero' d='M14 2h-.667V.667c0-.368-.298-.667-.666-.667H12c-.368 0-.667.299-.667.667V2H4.667V.667C4.667.299 4.368 0 4 0h-.667c-.368 0-.666.299-.666.667V2H2C.897 2 0 2.897 0 4v10c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm0 12.667H2c-.368 0-.667-.299-.667-.667V6.027h13.334V14c0 .368-.299.667-.667.667z'/%3E%3Cpath d='M4.8 8.4H11.2V12.4H4.8z'/%3E%3C/g%3E%3C/svg%3E%0A");
+}

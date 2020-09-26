@@ -1,0 +1,207 @@
+/* create task overlay */
+.create-task-overlay {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background-color: rgba(77, 77, 77, 0.85);
+    position: absolute;
+    display: none;
+}
+
+.active__overlay.create-task-overlay {
+    display: block;
+}
+
+.create-task-widget {
+    max-width: 550px;
+    width: 100%;
+    margin: 40px auto 0;
+    padding: 20px;
+    border-radius: 6px;
+    background-color: #FFF;
+    min-height: 284px;
+}
+
+.form__row {
+    width: 100%;
+}
+
+.form__row label {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: 500;
+    color: #000;
+}
+
+.ct-widget-input {
+    width: 100%;
+    height: 52px;
+    border-radius: 2px;
+    border: solid 1px #eaedf2;
+    background-color: #f8f9fb;
+    padding: 16px 18px;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #0a2541;
+    transition: all .3s ease;
+}
+
+.ct-widget-input::placeholder,
+.ct-widget-input::-webkit-input-placeholder,
+.ct-widget-input::-moz-placeholder {
+    color: #9197a1 !important;
+}
+
+.ct-widget-input:hover,
+.ct-widget-input:focus {
+    border: 1px solid #0a2541;
+}
+
+.form-flx {
+    display: flex;
+    justify-content: space-between;
+}
+
+.wid-50 {
+    width: calc(50% - 10px);
+}
+
+.date__picker-wrap {
+    display: flex;
+    align-items: center;
+    height: 48px;
+    width: 100%;
+    border-radius: 4px;
+    border: solid 0.8px rgba(211, 218, 226, 0.63);
+    background-color: rgba(237, 241, 244, 0.42);
+    position: relative;
+}
+
+.date__picker-ico {
+    position: absolute;
+    left: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+    z-index: 1;
+}
+
+.date__picker-input {
+    cursor: pointer;
+    width: 100%;
+    padding: 15px 20px 15px 48px;
+    height: 100%;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    line-height: normal;
+    color: #0a2541;
+    background: transparent;
+    border: none;
+    z-index: 2;
+}
+
+.date__picker-arrow {
+    z-index: 1;
+    position: absolute;
+    right: 20px;
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.time__picker-num {
+    max-width: 135px;
+    height: 48px;
+    border-radius: 4px;
+    border: solid 0.8px rgba(211, 218, 226, 0.63);
+    background-color: rgba(237, 241, 244, 0.42);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 10px;
+}
+
+.time__picker-select {
+    width: 48px;
+    height: 30px;
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    border: none;
+    outline: none;
+    background-color: #eaedf2;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    text-align: center;
+    color: #0a2541;
+    padding-left: 15px;
+    cursor: pointer;
+}
+
+.colon-space {
+    margin: 0 5px;
+    font-weight: 500;
+}
+
+.time-meridian {
+    width: 100px;
+    height: 48px;
+    border-radius: 4px;
+    border: solid 0.8px rgba(211, 218, 226, 0.63);
+    background-color: rgba(237, 241, 244, 0.42);
+    display: inline-flex;
+    justify-content: center;
+    align-items: center;
+    padding: 15px 20px;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='9' viewBox='0 0 18 9'%3E%3Cpath fill='%230a2541' d='M16.72 1.308L9.558 8.47c-.293.293-.767.293-1.06 0L1.336 1.308c-.292-.293-.292-.767 0-1.06.141-.141.332-.22.53-.22H16.19c.415 0 .75.336.75.75 0 .199-.079.39-.22.53z'/%3E%3C/svg%3E%0A");
+    background-repeat: no-repeat;
+    background-size: 14px 9px;
+    background-position: right 18px center;
+    cursor: pointer;
+}
+
+.comn__form-btn {
+    width: 100%;
+    height: 52px;
+    border-radius: 4px;
+    border: none;
+    outline: none;
+    display: flex;
+    justify-content: center;
+    align-items: center;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #FFF;
+    transition: .3s all ease;
+}
+
+.btn__cancel-form {
+    background-color: #aeaeae;
+}
+
+.btn__create-form {
+    background-color: #52a701;
+}
+
+.btn__cancel-form:hover {
+    background-color: #949393;
+}
+
+.btn__create-form:hover {
+    background-color: #448b01;
+}
+
+.form__error-para {
+    display: none;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-style: italic;
+    text-align: center;
+    margin-top: 10px;
+    color: red;
+}

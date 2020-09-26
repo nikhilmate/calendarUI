@@ -1,0 +1,26 @@
+.calender-info {
+    align-items: center;
+    margin-top: 24px;
+}
+
+.blk__label-text {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #000;
+    line-height: .82;
+    margin-left: 8px;
+}
+
+.blk__task-label:not(:first-child) {
+    margin-left: 20px;
+}
+
+.btn__cal-reload {
+    margin: 0 12px;
+}
+
+.btn__cal-reload,
+.btn__comn-cal-change {
+    cursor: pointer;
+}

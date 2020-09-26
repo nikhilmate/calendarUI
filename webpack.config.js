@@ -57,5 +57,6 @@ module.exports = {
         watchContentBase: true,
         writeToDisk: true,
         port: 5013
-    }
+    },
+    watch: true
 };

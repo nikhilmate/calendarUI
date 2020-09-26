@@ -1,0 +1,194 @@
+/* header  */
+.calendar__app-header {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    background-color: #0a2541;
+    box-shadow: 0 2px 4px 1px rgba(0, 0, 0, 0.4);
+    z-index: 2;
+}
+
+.app__header-inner {
+    padding: 15px;
+    max-width: 850px;
+    margin: 0 auto;
+}
+
+.app__logo {
+    width: 60px;
+    height: 60px;
+}
+
+.btn__comn--user-action {
+    font-size: 18px;
+    display: inline-flex;
+    font-weight: 500;
+    background: transparent;
+    color: #52a701;
+    border-radius: 4px;
+    transition: all 0.3s ease;
+}
+
+/* 
+.btn__comn--user-action:hover {
+    color: #69d802;
+} */
+
+.wrap__user-action {
+    position: relative;
+}
+
+/* widget */
+.wrap__user-action--widget {
+    position: absolute;
+    top: 40px;
+    right: 0;
+    width: 280px;
+    background-color: #fff;
+    box-shadow: 0 4px 8px 0 rgba(60, 64, 67, 0.15);
+    border-radius: 4px;
+    display: none;
+}
+
+.wrap__user-action--widget.showWidget {
+    display: block;
+}
+
+.wrap__user-action--widget:before {
+    content: '';
+    position: absolute;
+    top: -11px;
+    right: 24px;
+    width: 0;
+    height: 0;
+    z-index: 1;
+    border-left: 8px solid transparent;
+    border-right: 8px solid transparent;
+    border-radius: 2px;
+    border-bottom: 12px solid #fff;
+}
+
+.wrap__user-action--widget.sign_in:before {
+    right: 110px;
+}
+
+.user-action--widget-inner {
+    padding: 15px 20px 20px;
+}
+
+.h1__ua--widget-title {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 26px;
+    color: #112b46;
+    font-weight: 700;
+}
+
+/* 
+.form__user-action label {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    color: #757e8e;
+    font-weight: 500;
+    margin-bottom: 5px;
+    display: block;
+} */
+
+.input__comn--form-input {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    color: #112b46;
+    padding: 0 15px;
+    width: 100%;
+    height: 44px;
+    border-radius: 2px;
+    border: solid 1px #eaedf2;
+    background-color: #f8f9fb;
+    transition: 0.3s all ease;
+}
+
+.input__comn--form-input:focus {
+    border-color: #c9ccd1;
+}
+
+.btn__widget-form {
+    width: 100%;
+    height: 44px;
+    border-radius: 2px;
+    font-size: 16px;
+    font-weight: 500;
+    cursor: pointer;
+    color: #fff;
+    background-color: #52a701;
+}
+
+.btn__widget-form:hover {
+    background-color: #499501;
+}
+
+.p__widget-errorMsg {
+    color: rgba(255, 0, 0, 0.85);
+    font-size: 12px;
+    font-style: italic;
+    user-select: none;
+    margin-top: 10px;
+}
+
+.monthlyCalendar {
+    max-width: 210px;
+}
+
+.monthlyCalendar div {
+    box-sizing: border-box;
+    -moz-box-sizing: border-box;
+    -webkit-box-sizing: border-box;
+    text-align: center;
+}
+
+.monthlyCalendarYear {}
+
+.monthlyCalendarMonth {
+    font-size: 44px;
+    font-weight: bold;
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+}
+
+.btnChangeMonth {
+    font-size: 32px;
+    padding-top: 8px;
+}
+
+.dayCell {
+    width: 30px;
+    height: 30px;
+    line-height: 30px;
+    float: left;
+}
+
+.startWithMon .dayCell:nth-child(7n),
+.startWithSun .dayCell:nth-child(7n + 1) {
+    color: #000;
+}
+
+.startWithMon .dayCell:nth-child(7n):after,
+.startWithSun .dayCell:nth-child(7n + 1):after {
+    content: '\00a0 ';
+    background-color: #ff0000;
+    border-radius: 2;
+    width: 33px;
+    height: 33px;
+    display: block;
+    position: relative;
+    top: 0;
+    left: 0;
+    z-index: -1;
+}
+
+.btnChangeMonth {
+    cursor: pointer;
+}
+
+.btnChangeMonth:hover {
+    color: #666666;
+}

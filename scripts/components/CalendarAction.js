@@ -1,73 +1,96 @@
 import React, { Component } from 'react';
 import Select from './Select';
-import { monthArray, getMonthName, getYear, getYearArr } from '../utils/Util';
-
-let monthArr = monthArray;
-let yearArr = getYearArr();
-let newDate = new Date();
-let currentMonth = getMonthName(newDate, true);
-let currentYear = getYear(newDate);
+import {
+    monthArray,
+    getMonthName,
+    getYear,
+    getYearArr,
+    getMonthIndex
+} from '../utils/Util';
+import AppContext from '../store/AppContext';
 
 class CalendarAction extends Component {
     constructor(props) {
         super(props);
-        this.state = {
-            value: ''
-        };
-        this.dateChangeHandler = this.dateChangeHandler.bind(this);
     }
 
-    dateChangeHandler(value) {
-        console.log('APP: ', value);
+    static contextType = AppContext;
+
+    monthChangeHandler = (monthIndex) => {
+        let month = getMonthIndex(monthIndex);
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'changeCalendarView',
+                month
+            });
+    };
+
+    yearChangeHandler = (_year) => {
+        let year = parseInt(_year);
+        this.context.contextReducer({
+            type: 'changeCalendarView',
+            year
+        });
+    };
+
+    componentDidMount() {
+        let newDate = new Date();
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'changeCalendarView',
+                month: newDate.getMonth(),
+                year: newDate.getFullYear()
+            });
     }
 
-    // componentDidMount() {
-    //     fetch('/api/user/register', {
-    //         method: 'POST', // POST, PUT, DELETE, etc.
-    //         body: JSON.stringify({
-    //             email: 'ui-test@abc.com',
-    //             password: 'ui-test'
-    //         }),
-    //         headers: {
-    //             'Content-Type': 'application/json'
-    //         }
-    //     })
-    //         .then((res) => res.json())
-    //         .then((res) => {
-    //             console.log(res);
-    //         });
-    // }
+    createTaskHandler = () => {
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'createTaskUpdate',
+                timestamp: new Date().getTime()
+            });
+    };
 
     render() {
+        let tempNow = new Date(),
+            context_month = this.context.AppData.calendarState.currentView
+                .month,
+            context_year = this.context.AppData.calendarState.currentView.year;
+        let currMonth =
+                context_month != null
+                    ? getMonthName(context_month)
+                    : getMonthName(tempNow.getMonth()),
+            currYear = context_year !== null ? context_year : getYear(tempNow);
         return (
             <React.Fragment>
-                <div className="calender-action-1 set-calender-action just-betwn">
-                    <div className="date-setter-wrap align-flx">
-                        <div className="comn-date-setter">
+                <div className="app__action-one just-betwn">
+                    <div className="wrap__date-setter inline-flx align--center">
+                        <div className="comn__date-setter">
                             <Select
-                                className="date-selector-wrap month-select"
+                                className="blk__date-selector month-select"
                                 name="month-select"
                                 id="month-select"
-                                options={monthArr}
-                                defaultOption={currentMonth}
-                                onChangeHandler={this.dateChangeHandler}
+                                options={monthArray}
+                                defaultOption={currMonth}
+                                onChangeHandler={this.monthChangeHandler}
                             />
                         </div>
-                        <div className="comn-date-setter ml-10">
+                        <div className="comn__date-setter ml-10">
                             <Select
-                                className="date-selector-wrap year-select"
+                                className="blk__date-selector year-select"
                                 name="year-select"
                                 id="year-select"
-                                options={yearArr}
-                                defaultOption={currentYear}
-                                onChangeHandler={this.dateChangeHandler}
+                                options={getYearArr()}
+                                defaultOption={currYear}
+                                onChangeHandler={this.yearChangeHandler}
                             />
                         </div>
                     </div>
-                    <div className="task-btn-wrap">
+                    <div className="wrap__task-btn">
                         <button
-                            id="create-task-btn"
-                            className="create-task-btn"
+                            id="create-task--btn"
+                            className="create-task--btn comn__btn"
+                            onClick={this.createTaskHandler}
                         >
                             Create a task
                         </button>
