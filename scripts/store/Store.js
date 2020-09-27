@@ -8,14 +8,21 @@ const initState = {
     userDetails: {
         email: null
     },
+    isLogged: false,
     taskManager: {
         tasks: []
     },
-    isLogged: false,
     curfToken: null,
     taskState: {
         createTaskDetails: {
-            timestamp: null
+            timestamp: null,
+            triggerType: 'create', //create/update
+            description: null,
+            date: null,
+            hour: null,
+            min: null,
+            format: null,
+            error: null
         }
     },
     calendarState: {

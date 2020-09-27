@@ -20,7 +20,7 @@
     margin: 40px auto 0;
     padding: 20px;
     border-radius: 6px;
-    background-color: #FFF;
+    background-color: #fff;
     min-height: 284px;
 }
 
@@ -46,7 +46,7 @@
     font-size: 16px;
     font-weight: 400;
     color: #0a2541;
-    transition: all .3s ease;
+    transition: all 0.3s ease;
 }
 
 .ct-widget-input::placeholder,
@@ -176,8 +176,8 @@
     font-size: 18px;
     font-weight: 500;
     cursor: pointer;
-    color: #FFF;
-    transition: .3s all ease;
+    color: #fff;
+    transition: 0.3s all ease;
 }
 
 .btn__cancel-form {
@@ -197,7 +197,7 @@
 }
 
 .form__error-para {
-    display: none;
+    /* display: none; */
     font-family: 'Roboto', Arial, Helvetica, sans-serif;
     font-size: 14px;
     font-style: italic;

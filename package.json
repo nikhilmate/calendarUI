@@ -36,6 +36,7 @@
         "passport-jwt": "^4.0.0",
         "path": "^0.12.7",
         "react": "^16.13.1",
+        "react-datepicker": "^3.2.2",
         "react-dom": "^16.13.1",
         "sequelize": "^6.3.4",
         "sqlite3": "^5.0.0",

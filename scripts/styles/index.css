@@ -1,4 +1,5 @@
 @import './common/reset.css';
+@import 'react-datepicker/dist/react-datepicker.css';
 @import './common/view.css';
 @import './common/header.css';
 @import './common/action1.css';

@@ -3,6 +3,7 @@ const ACTION = {
     signOut: 'signOut',
     updateTaskList: 'updateTaskList',
     createTaskUpdate: 'createTaskUpdate',
+    resetTaskUpdate: 'resetTaskUpdate',
     changeCalendarView: 'changeCalendarView'
 };
 
@@ -17,7 +18,14 @@ const initialState = {
     curfToken: null,
     taskState: {
         createTaskDetails: {
-            timestamp: null
+            timestamp: null,
+            triggerType: 'create', //create/update
+            description: null,
+            date: null,
+            hour: null,
+            min: null,
+            format: null,
+            error: null
         }
     },
     calendarState: {
@@ -49,10 +57,52 @@ export default (state, payload) => {
                 return Object.assign({}, initialState);
 
             case ACTION.createTaskUpdate:
-                const { timestamp } = payload;
+                const timestamp = payload.hasOwnProperty('timestamp')
+                        ? payload.timestamp
+                        : state.taskState.createTaskDetails.timestamp,
+                    triggerType = payload.hasOwnProperty('triggerType')
+                        ? payload.triggerType
+                        : state.taskState.createTaskDetails.triggerType,
+                    description = payload.hasOwnProperty('description')
+                        ? payload.description
+                        : state.taskState.createTaskDetails.description,
+                    date = payload.hasOwnProperty('date')
+                        ? payload.date
+                        : state.taskState.createTaskDetails.date,
+                    hour = payload.hasOwnProperty('hour')
+                        ? payload.hour
+                        : state.taskState.createTaskDetails.hour,
+                    min = payload.hasOwnProperty('min')
+                        ? payload.min
+                        : state.taskState.createTaskDetails.min,
+                    format = payload.hasOwnProperty('format')
+                        ? payload.format
+                        : state.taskState.createTaskDetails.format,
+                    error = payload.hasOwnProperty('error')
+                        ? payload.error
+                        : state.taskState.createTaskDetails.error;
                 return Object.assign({}, state, {
                     taskState: Object.assign({}, state.taskState, {
-                        createTaskDetails: { timestamp }
+                        createTaskDetails: {
+                            timestamp,
+                            triggerType,
+                            description,
+                            date,
+                            hour,
+                            min,
+                            format,
+                            error
+                        }
+                    })
+                });
+
+            case ACTION.resetTaskUpdate:
+                return Object.assign({}, state, {
+                    taskState: Object.assign({}, state.taskState, {
+                        createTaskDetails: Object.assign(
+                            {},
+                            initialState.taskState.createTaskDetails
+                        )
                     })
                 });
 

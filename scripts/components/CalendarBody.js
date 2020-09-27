@@ -4,7 +4,10 @@ import {
     getDaysInMonth,
     getTitleDate,
     getWeeksInMonth,
-    isHoliday
+    isHoliday,
+    getMins,
+    getHour,
+    getFormat
 } from '../utils/Util';
 import AppContext from '../store/AppContext';
 
@@ -15,10 +18,20 @@ class CalendarBody extends Component {
     static contextType = AppContext;
 
     createTaskHandler = (e, timestamp) => {
+        let now = new Date(timestamp),
+            min = getMins(now),
+            hour = getHour(now),
+            format = getFormat(now),
+            date = now;
         typeof this.context.contextReducer == 'function' &&
             this.context.contextReducer({
                 type: 'createTaskUpdate',
-                timestamp
+                triggerType: 'create',
+                timestamp,
+                min,
+                hour,
+                format,
+                date
             });
     };
 
@@ -27,6 +40,7 @@ class CalendarBody extends Component {
             context_month = this.context.AppData.calendarState.currentView
                 .month,
             context_year = this.context.AppData.calendarState.currentView.year,
+            context_isLogged = this.context.AppData.isLogged,
             allRow = [],
             allCol = [],
             year = context_year !== null ? context_year : tempNow.getFullYear(),
@@ -95,7 +109,9 @@ class CalendarBody extends Component {
                         month === today.getMonth()
                     ) {
                         isCurrentDate = 'current-date';
-                        createVisible = true;
+                        if (context_isLogged) {
+                            createVisible = true;
+                        }
                     } else if (
                         givenDateTimestamp <
                         new Date(
@@ -107,9 +123,10 @@ class CalendarBody extends Component {
                         isCurrentDate = 'old-date';
                     } else {
                         isCurrentDate = '';
-                        createVisible = true;
+                        if (context_isLogged) {
+                            createVisible = true;
+                        }
                     }
-
                     allCol.push(
                         <td
                             title={getTitleDate(new Date(year, month, date))}

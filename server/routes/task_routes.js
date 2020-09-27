@@ -5,7 +5,7 @@ module.exports = (app, passport) => {
 
     // Retrieve user
     router.post(
-        '/create/:email',
+        '/create',
         passport.authenticate('jwt', {
             session: false,
             failureRedirect: '/api/user/notLogged'
@@ -32,7 +32,7 @@ module.exports = (app, passport) => {
     );
 
     router.get(
-        '/all/:email',
+        '/all',
         passport.authenticate('jwt', {
             session: false,
             failureRedirect: '/api/user/notLogged'

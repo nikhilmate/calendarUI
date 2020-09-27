@@ -5,7 +5,9 @@ const URL = {
     signIn: '/api/user/login',
     signUp: '/api/user/register',
     isLogged: '/api/user/isLogged',
-    logout: '/api/user/logout'
+    logout: '/api/user/logout',
+    createTask: '/api/task/create',
+    getTaskDetails: '/api/task/all'
 };
 
 export const signIn = (payload) => {
@@ -71,6 +73,43 @@ export const signOut = () => {
     );
     var promise = new Promise(function (resolve, reject) {
         Xhr(URL.logout, config)
+            .then((res) => {
+                resolve(res);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+    return promise;
+};
+
+export const createTask = (payload) => {
+    const config = Object.assign({}, payload, {
+        method: 'POST'
+    });
+    var promise = new Promise(function (resolve, reject) {
+        Xhr(URL.createTask, config)
+            .then((res) => {
+                resolve(res);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+    return promise;
+};
+
+export const getTaskDetails = () => {
+    const config = Object.assign(
+        {},
+        {
+            method: 'GET'
+        }
+    );
+    var promise = new Promise(function (resolve, reject) {
+        Xhr(URL.getTaskDetails, config)
             .then((res) => {
                 resolve(res);
             })

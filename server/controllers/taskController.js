@@ -5,18 +5,13 @@ const UTILS = {
         let description = taskObj['description']
             ? taskObj['description'].trim()
             : false;
-        let timestamp = taskObj['timestamp']
-            ? eval(taskObj['timestamp']) > 0
-                ? taskObj['timestamp'].trim()
-                : false
-            : false;
+        let timestamp = taskObj['timestamp'] ? taskObj['timestamp'] : false;
         let isFinished =
-            taskObj['isFinished'] &&
-            typeof eval(taskObj['isFinished']) == 'boolean'
+            taskObj['isFinished'] && typeof taskObj['isFinished'] == 'boolean'
                 ? taskObj['isFinished']
                 : false;
 
-        if (description && timestamp && isFinished) {
+        if (description && timestamp) {
             return Object.assign(
                 {},
                 {
@@ -30,28 +25,22 @@ const UTILS = {
     getValidUpdateTaskDetails: (taskObj) => {
         try {
             let TaskDetails = new Object(),
-                description = !!taskObj['description']
+                description = taskObj['description']
                     ? taskObj['description'].trim()
-                    : false,
-                timestamp = !!taskObj['timestamp']
-                    ? eval(taskObj['timestamp']) > 0
-                        ? taskObj['timestamp'].trim()
-                        : false
-                    : false,
-                isFinished =
-                    !!taskObj['isFinished'] &&
-                    typeof eval(taskObj['isFinished']) == 'boolean'
-                        ? taskObj['isFinished']
-                        : 'false';
+                    : false;
+            let timestamp = taskObj['timestamp'] ? taskObj['timestamp'] : false;
+            let isFinished =
+                taskObj['isFinished'] &&
+                typeof taskObj['isFinished'] == 'boolean'
+                    ? taskObj['isFinished']
+                    : false;
 
+            TaskDetails = Object.assign(TaskDetails, { isFinished });
             if (description) {
                 TaskDetails = Object.assign(TaskDetails, { description });
             }
             if (timestamp) {
                 TaskDetails = Object.assign(TaskDetails, { timestamp });
-            }
-            if (isFinished) {
-                TaskDetails = Object.assign(TaskDetails, { isFinished });
             }
             return TaskDetails;
         } catch (error) {
@@ -62,11 +51,12 @@ const UTILS = {
 
 module.exports = {
     async createTask(req, res) {
+        let { email } = req.user.get();
         try {
             let validTask = UTILS.validTaskDetails(req.body);
             if (!!validTask) {
                 validTask = Object.assign(validTask, {
-                    user_email: req.params.email
+                    user_email: email
                 });
                 task = await Task.create(validTask);
                 if (!!task) {

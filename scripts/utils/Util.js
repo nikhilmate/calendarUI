@@ -127,10 +127,49 @@ export const getFormat = (_dateInstance) => {
     return _dateInstance.getHours() >= 12 ? 'PM' : 'AM';
 };
 
+export const getFormatedHour = (hour, format) => {
+    let tempHour;
+    if (format == 'AM') tempHour = hour == 12 ? 0 : hour;
+    else tempHour = hour == 12 ? hour : hour + 12;
+    return tempHour;
+};
+
 export const getTitleDate = (_dateInstance) => {
     return _dateInstance.toLocaleDateString('en-GB', {
         year: 'numeric',
         month: 'long',
         day: 'numeric'
     });
+};
+
+export const createTaskValidation = (taskObj) => {
+    let error = '';
+    if (!taskObj['description'] || !taskObj['description'].trim()) {
+        error = 'Please add description.';
+        return error;
+    }
+    if (!taskObj['date']) {
+        error = 'Please select the date.';
+        return error;
+    }
+    if (!taskObj['hour']) {
+        error = 'Please select the hour.';
+        return error;
+    }
+    if (!taskObj['min']) {
+        error = 'Please select the minutes.';
+        return error;
+    }
+    if (!taskObj['format']) {
+        error = 'Please select the meridian.';
+        return error;
+    }
+    return true;
+};
+
+export const dateIsValid = (targetDate, idealDate) => {
+    if (targetDate + 60000 < idealDate) {
+        return false;
+    }
+    return true;
 };

@@ -6,10 +6,15 @@ import {
     getHourArr,
     getMins,
     getHour,
-    getFormat
+    getFormat,
+    createTaskValidation,
+    dateIsValid,
+    getFormatedHour
 } from '../utils/Util';
-
+import DatePickerComp from 'react-datepicker';
+import CustomDateInput from './CustomDateInput';
 import AppContext from '../store/AppContext';
+import { createTask, getTaskDetails } from '../utils/ApiActions';
 
 class TaskUpdate extends Component {
     constructor(props) {
@@ -17,39 +22,193 @@ class TaskUpdate extends Component {
     }
     static contextType = AppContext;
 
-    timeChangeHandler = (e, mode) => {
+    timeChangeHandler = (value, mode) => {
         switch (mode) {
             case 'hour':
+                typeof this.context.contextReducer == 'function' &&
+                    this.context.contextReducer({
+                        type: 'createTaskUpdate',
+                        hour: value
+                    });
                 break;
             case 'min':
+                typeof this.context.contextReducer == 'function' &&
+                    this.context.contextReducer({
+                        type: 'createTaskUpdate',
+                        min: value
+                    });
                 break;
             case 'format':
+                typeof this.context.contextReducer == 'function' &&
+                    this.context.contextReducer({
+                        type: 'createTaskUpdate',
+                        format: value
+                    });
                 break;
-
             default:
                 break;
         }
     };
 
-    // typeof this.context.contextReducer == 'function' &&
-    // this.context.contextReducer({
-    //     type: 'signOut'
-    // });
+    datePickerChangeHandler = (date) => {
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'createTaskUpdate',
+                date
+            });
+    };
+
+    cancelCreateTaskHandler = () => {
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'resetTaskUpdate'
+            });
+    };
+
+    descriptionChangeHandler = (e) => {
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'createTaskUpdate',
+                description: e.target.value
+            });
+    };
+
+    createTaskXHR = (config) => {
+        try {
+            createTask(config)
+                .then((res) => {
+                    if (res.hasOwnProperty('success')) {
+                        if (res.success == true) {
+                            this.fetchAllTasks();
+                            this.cancelCreateTaskHandler();
+                        } else if (res.success == false && !!res.errors) {
+                            this.setError(
+                                `Couldn't create task. Please try again`
+                            );
+                        }
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.setError(`Couldn't create task. Please try again`);
+                });
+        } catch (error) {
+            console.log(error);
+            this.setError(`Couldn't create task. Please try again.`);
+        }
+    };
+
+    fetchAllTasks = () => {
+        try {
+            getTaskDetails()
+                .then((res) => {
+                    if (res.hasOwnProperty('success')) {
+                        if (!!res.success) {
+                            this.context.contextReducer({
+                                type: 'updateTaskList',
+                                tasks: res.tasks
+                            });
+                        } else if (!res.success && !!res.errors) {
+                            this.setError(
+                                `Couldn't fetch tasks. Please try again`
+                            );
+                        }
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.setError(`Couldn't fetch tasks. Please try again`);
+                });
+        } catch (error) {
+            console.log(error);
+            this.setError(`Couldn't fetch tasks. Please try again.`);
+        }
+    };
+
+    taskUpdateHandler = () => {
+        let {
+            triggerType,
+            description,
+            date,
+            hour,
+            min,
+            format
+        } = this.context.AppData.taskState.createTaskDetails;
+        let isValid = createTaskValidation(
+            this.context.AppData.taskState.createTaskDetails
+        );
+        if (isValid === true) {
+            let curTime = new Date();
+            switch (triggerType) {
+                case 'create':
+                    let tempHour = getFormatedHour(hour, format),
+                        temp1 = new Date(date).setHours(tempHour, min, 0),
+                        targetTime = new Date(temp1),
+                        isValidDate = dateIsValid(targetTime, curTime);
+                    if (isValidDate) {
+                        this.createTaskXHR({
+                            body: {
+                                description,
+                                timestamp: targetTime.getTime(),
+                                isFinished: false
+                            },
+                            headers: {
+                                'XSRF-TOKEN': this.context.AppData.curfToken
+                            }
+                        });
+                    }
+                    break;
+                case 'update':
+
+                default:
+                    break;
+            }
+        } else if (typeof isValid == 'string' && isValid != '') {
+            this.setError(isValid);
+        }
+    };
+
+    setError = (error) => {
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'createTaskUpdate',
+                error
+            });
+
+        setTimeout(() => {
+            typeof this.context.contextReducer == 'function' &&
+                this.context.contextReducer({
+                    type: 'createTaskUpdate',
+                    error: null
+                });
+        }, 4000);
+    };
 
     render() {
-        let { timestamp } = this.context.AppData.taskState.createTaskDetails,
-            now = !!timestamp ? new Date(timestamp) : new Date(),
+        let tempNow = new Date();
+        let {
+                timestamp,
+                triggerType,
+                description,
+                date,
+                hour,
+                min,
+                format,
+                error
+            } = this.context.AppData.taskState.createTaskDetails,
+            now = !!timestamp ? timestamp : tempNow.getTime(),
+            nowDate = new Date(now),
             newState = {
-                currentMin: getMins(now),
-                currentHour: getHour(now),
-                currentFormat: getFormat(now)
+                currentMin: getMins(nowDate),
+                currentHour: getHour(nowDate),
+                currentFormat: getFormat(nowDate)
             };
         let formatArr = ['AM', 'PM'],
             mins = getMinArr(),
             hours = getHourArr(),
-            currentMin = newState.currentMin,
-            currentHour = newState.currentHour,
-            currentFormat = newState.currentFormat,
+            currentMin = min ? min : newState.currentMin,
+            currentHour = hour ? hour : newState.currentHour,
+            currentFormat = format ? format : newState.currentFormat,
             activeOverlay = !!timestamp && 'active__overlay';
         return (
             <div
@@ -70,6 +229,8 @@ class TaskUpdate extends Component {
                                 id="input__create-task"
                                 name="input__create-task"
                                 placeholder="Enter Task Description…"
+                                onChange={this.descriptionChangeHandler}
+                                value={!!description ? description : ''}
                             />
                         </div>
                         <div className="form__row mt-20 form-flx">
@@ -83,15 +244,16 @@ class TaskUpdate extends Component {
                                     <span className="date__picker-ico inline-flx">
                                         <DatePickerIcon />
                                     </span>
-                                    <input
-                                        autoComplete="off"
-                                        type="text"
-                                        placeholder="mm/dd/yyyy"
-                                        name="dateinput"
-                                        className="date__picker-input"
-                                        id="date__picker-input"
-                                        required
-                                        // readOnly="true"
+                                    <DatePickerComp
+                                        selected={date ? date : now}
+                                        onChange={(date) =>
+                                            this.datePickerChangeHandler(date)
+                                        }
+                                        minDate={tempNow}
+                                        showMonthDropdown
+                                        showYearDropdown
+                                        dropdownMode="select"
+                                        customInput={<CustomDateInput />}
                                     />
                                     <span className="date__picker-arrow inline-flx">
                                         <DownArrow />
@@ -150,6 +312,7 @@ class TaskUpdate extends Component {
                                 <button
                                     className="comn__form-btn btn__cancel-form"
                                     id="btn__cancel-form"
+                                    onClick={this.cancelCreateTaskHandler}
                                 >
                                     Cancel
                                 </button>
@@ -158,12 +321,17 @@ class TaskUpdate extends Component {
                                 <button
                                     className="comn__form-btn btn__create-form"
                                     id="btn__create-form"
+                                    onClick={this.taskUpdateHandler}
                                 >
-                                    Create
+                                    {triggerType == 'create'
+                                        ? 'Create'
+                                        : 'Update'}
                                 </button>
                             </div>
                         </div>
-                        <p className="form__error-para" id="form__error-para" />
+                        <p className="form__error-para" id="form__error-para">
+                            {error}
+                        </p>
                     </div>
                 </div>
             </div>

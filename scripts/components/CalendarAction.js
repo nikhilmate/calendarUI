@@ -44,10 +44,19 @@ class CalendarAction extends Component {
     }
 
     createTaskHandler = () => {
+        let now = new Date(),
+            min = getMins(now),
+            hour = getHour(now),
+            format = getFormat(now);
         typeof this.context.contextReducer == 'function' &&
             this.context.contextReducer({
                 type: 'createTaskUpdate',
-                timestamp: new Date().getTime()
+                triggerType: 'create',
+                timestamp: now.getTime(),
+                min,
+                hour,
+                format,
+                date: now
             });
     };
 
