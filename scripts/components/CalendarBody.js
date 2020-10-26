@@ -1,5 +1,5 @@
 import React, { Component } from 'react';
-import { PlusLogo } from '../utils/Icons';
+import { PlusLogo, DeleteIcon, EditIcon, CloseBtnIcon } from '../utils/Icons';
 import {
     getDaysInMonth,
     getTitleDate,
@@ -7,7 +7,8 @@ import {
     isHoliday,
     getMins,
     getHour,
-    getFormat
+    getFormat,
+    keyGen
 } from '../utils/Util';
 import AppContext from '../store/AppContext';
 
@@ -32,6 +33,87 @@ class CalendarBody extends Component {
                 hour,
                 format,
                 date
+            });
+    };
+
+    onHoverOfHoliday = (e, holidayName) => {
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'updateTooltipInfo',
+                tooltipFor: 'holiday',
+                utils: {
+                    holiday: holidayName
+                },
+                $elForTT: e.currentTarget
+            });
+    };
+
+    onHoverOfCreateTask = (e) => {
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'updateTooltipInfo',
+                tooltipFor: 'create',
+                $elForTT: e.currentTarget
+            });
+    };
+
+    onHoverOutCommon = () => {
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'resetTooltipInfo'
+            });
+    };
+
+    filterTasks = (timstamp, type) => {
+        if (timstamp) {
+            let tasks = this.context.AppData.taskManager.tasks.filter(
+                (task) => {
+                    let taskTS = task.timestamp
+                        ? Math.floor(task.timestamp)
+                        : null;
+                    if (taskTS) {
+                        let taskDate = new Date(taskTS),
+                            derivedTS = new Date(
+                                taskDate.getFullYear(),
+                                taskDate.getMonth(),
+                                taskDate.getDate()
+                            ).getTime();
+                        if (derivedTS == timstamp) return true;
+                        else return false;
+                    } else return false;
+                }
+            );
+            switch (type) {
+                case 'assign':
+                    let assignTasks = tasks.filter((task) => {
+                        if (!JSON.parse(task.isFinished)) {
+                            return true;
+                        } else return false;
+                    });
+                    return assignTasks;
+                case 'complete':
+                    let completeTasks = tasks.filter((task) => {
+                        if (JSON.parse(task.isFinished)) {
+                            return true;
+                        } else return false;
+                    });
+                    return completeTasks;
+                default:
+                    return [];
+            }
+        }
+        return [];
+    };
+
+    onHoverOfTasks = (e, type, taskArr) => {
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer({
+                type: 'updateTooltipInfo',
+                tooltipFor: type,
+                utils: {
+                    tasks: taskArr
+                },
+                $elForTT: e.currentTarget
             });
     };
 
@@ -65,7 +147,7 @@ class CalendarBody extends Component {
                             title={getTitleDate(
                                 new Date(prev_year, prev_month, tempDate)
                             )}
-                            key={'td' + colIndex}
+                            key={keyGen()}
                             className="comn__cell static_cell"
                         >
                             <div className="info-wrap">
@@ -80,7 +162,7 @@ class CalendarBody extends Component {
                             title={getTitleDate(
                                 new Date(year, month, date + newMonth - 1)
                             )}
-                            key={'td' + colIndex}
+                            key={keyGen()}
                             className="comn__cell static_cell"
                         >
                             <div className="info-wrap">
@@ -127,16 +209,33 @@ class CalendarBody extends Component {
                             createVisible = true;
                         }
                     }
+
+                    // task utils
+                    let assignedTasks = context_isLogged
+                            ? this.filterTasks(givenDateTimestamp, 'assign')
+                            : null,
+                        finishedTasks = context_isLogged
+                            ? this.filterTasks(givenDateTimestamp, 'complete')
+                            : null,
+                        isAssign =
+                            assignedTasks && assignedTasks.length > 0
+                                ? true
+                                : false,
+                        isComplete =
+                            finishedTasks && finishedTasks.length > 0
+                                ? true
+                                : false;
                     allCol.push(
                         <td
                             title={getTitleDate(new Date(year, month, date))}
-                            key={'td' + colIndex}
+                            key={keyGen()}
                             className="comn__cell month_date"
                             data-future-day={isCurrentDate}
                         >
                             <div className="info-wrap">
                                 {!!createVisible && (
                                     <span
+                                        key={keyGen()}
                                         className="plus-ico create-task-ico inline-flx"
                                         onClick={(e) =>
                                             this.createTaskHandler(
@@ -144,23 +243,60 @@ class CalendarBody extends Component {
                                                 createTaskTimestamp
                                             )
                                         }
+                                        onMouseEnter={(e) =>
+                                            this.onHoverOfCreateTask(e)
+                                        }
+                                        onMouseLeave={this.onHoverOutCommon}
                                     >
                                         <PlusLogo />
                                     </span>
                                 )}
                                 <span className="date__text">{date}</span>
                             </div>
-                            {isHolidayCheck && (
+                            {(isHolidayCheck || isAssign || isComplete) && (
                                 <div className="task__status-wrap">
                                     <>
                                         {isHolidayCheck && (
                                             <span
+                                                key={keyGen()}
                                                 className="view-status-btn"
                                                 data-task-status="holiday"
-                                                data-holiday-name={
-                                                    isHolidayCheck
+                                                onMouseEnter={(e) =>
+                                                    this.onHoverOfHoliday(
+                                                        e,
+                                                        isHolidayCheck
+                                                    )
+                                                }
+                                                onMouseLeave={
+                                                    this.onHoverOutCommon
                                                 }
                                             />
+                                        )}
+                                        {isAssign && (
+                                            <span
+                                                className="view-status-btn"
+                                                data-task-status="assign"
+                                                onMouseEnter={(e) =>
+                                                    this.onHoverOfTasks(
+                                                        e,
+                                                        'assign',
+                                                        assignedTasks
+                                                    )
+                                                }
+                                            ></span>
+                                        )}
+                                        {isComplete && (
+                                            <span
+                                                className="view-status-btn"
+                                                data-task-status="completed"
+                                                onMouseEnter={(e) =>
+                                                    this.onHoverOfTasks(
+                                                        e,
+                                                        'complete',
+                                                        completeTasks
+                                                    )
+                                                }
+                                            ></span>
                                         )}
                                     </>
                                 </div>
@@ -172,7 +308,7 @@ class CalendarBody extends Component {
                 colIndex++;
             }
             allRow.push(
-                <tr key={'tr' + colIndex} className="tabel__row">
+                <tr key={keyGen()} className="tabel__row">
                     {allCol}
                 </tr>
             );
@@ -181,309 +317,172 @@ class CalendarBody extends Component {
         return allRow;
     };
 
-    render() {
-        let allRow = this.renderCalenderUI();
-
-        return (
-            <div className="app__action-three wrap__calendar-body">
-                <table className="calender-viewport">
-                    <thead className="calender__header">
-                        <tr className="tabel__row">
-                            <th className="weekday comn__cell">Sun</th>
-                            <th className="weekday comn__cell">Mon</th>
-                            <th className="weekday comn__cell">Tue</th>
-                            <th className="weekday comn__cell">Wed</th>
-                            <th className="weekday comn__cell">Thu</th>
-                            <th className="weekday comn__cell">Fri</th>
-                            <th className="weekday comn__cell">Sat</th>
-                        </tr>
-                    </thead>
-                    <tbody className="calender__body">{allRow}</tbody>
-                </table>
-                <div className="calender-overlay">
-                    <div className="comn-tooltip tt__create-task">
-                        <div className="task-tooltip-inner">
-                            <p className="tt-text tt__ct-text">Create a task</p>
-                        </div>
-                    </div>
-                    <div className="comn-tooltip tt__holiday">
+    renderTooltipBody = () => {
+        let renderArr = [],
+            tooltipData = this.context.AppData.calendarState.tooltip,
+            tooltipFor = tooltipData.tooltipFor,
+            holidayName =
+                tooltipData.utils && tooltipData.utils.hasOwnProperty('holiday')
+                    ? tooltipData.utils.holiday
+                    : '';
+        if (tooltipFor == 'holiday') {
+            if (holidayName) {
+                renderArr.push(
+                    <div key="holiday" className="comn-tooltip tt__holiday">
                         <div className="task-tooltip-inner">
                             <p className="tt-text tt__holiday-text">
-                                adadasdj adjas ja djasdj aawdadjaa adasd
+                                {holidayName}
                             </p>
                         </div>
                     </div>
-                    <div className="comn-tooltip tt__task-list">
-                        <div className="task-tooltip-inner">
-                            <div className="task-list-wrap">
-                                <div className="task__info">
-                                    <div className="task__info-inner">
-                                        <div className="task__status">
-                                            <input
-                                                type="checkbox"
-                                                name="task__checkbox"
-                                                id="task__checkbox1"
-                                            />
-                                            <label htmlFor="task__checkbox1" />
-                                        </div>
-                                        <div className="task__desc">
-                                            <h1 className="task__title">
-                                                Task title 1
-                                            </h1>
-                                            <p className="task__deadline">
-                                                02 : 20 PM
-                                            </p>
-                                        </div>
-                                        <div className="task__actions">
-                                            <a className="task__edit edit-task">
-                                                <svg
-                                                    className="dl-blk"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width={18}
-                                                    height={18}
-                                                    viewBox="0 0 18 18"
-                                                >
-                                                    <defs>
-                                                        <filter id="z1yte48lya">
-                                                            <feColorMatrix
-                                                                in="SourceGraphic"
-                                                                values="0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 1.000000 0"
-                                                            />
-                                                        </filter>
-                                                    </defs>
-                                                    <g
-                                                        fill="none"
-                                                        fillRule="evenodd"
-                                                        filter="url(#z1yte48lya)"
-                                                        transform="translate(-270)"
-                                                    >
-                                                        <g>
-                                                            <path
-                                                                fill="#FFF"
-                                                                fillRule="nonzero"
-                                                                d="M0 14.248L0 17.998 3.75 17.998 14.815 6.932 11.065 3.182zM17.705 2.627L15.37.293c-.39-.39-1.025-.39-1.415 0l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.026 0-1.416z"
-                                                                transform="translate(270)"
-                                                            />
-                                                        </g>
-                                                    </g>
-                                                </svg>
-                                            </a>
-                                            <a className="task__delete delete-task">
-                                                <svg
-                                                    className="dl-blk"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width={14}
-                                                    height={18}
-                                                    viewBox="0 0 14 18"
-                                                >
-                                                    <defs>
-                                                        <filter id="xqov8ytv0a">
-                                                            <feColorMatrix
-                                                                in="SourceGraphic"
-                                                                values="0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 1.000000 0"
-                                                            />
-                                                        </filter>
-                                                    </defs>
-                                                    <g
-                                                        fill="none"
-                                                        fillRule="evenodd"
-                                                        filter="url(#xqov8ytv0a)"
-                                                        transform="translate(-309)"
-                                                    >
-                                                        <g>
-                                                            <path
-                                                                fill="#FFF"
-                                                                fillRule="nonzero"
-                                                                d="M5.497 1.087h3.009v.506h1.086v-.577C9.592.456 9.137 0 8.577 0H5.426c-.56 0-1.015.456-1.015 1.016v.577h1.086v-.506zM12.101 5.897H1.902c-.28 0-.5.239-.477.518l.853 10.543c.047.589.538 1.042 1.128 1.042h7.191c.59 0 1.08-.453 1.128-1.042l.853-10.543c.023-.28-.197-.518-.477-.518zm-7.73 10.978l-.033.002c-.285 0-.524-.222-.542-.51L3.262 7.71c-.019-.3.209-.557.508-.576.299-.018.558.21.576.509L4.88 16.3c.019.3-.209.557-.508.575zm3.18-.542c0 .3-.243.543-.543.543-.3 0-.544-.243-.544-.543V7.677c0-.3.244-.543.544-.543.3 0 .543.243.543.543v8.656zm3.19-8.624l-.51 8.656c-.016.289-.256.511-.541.511h-.033c-.3-.018-.528-.275-.51-.575l.51-8.656c.018-.3.274-.528.574-.51.3.018.528.275.51.574zM13.98 4.22l-.357-1.069c-.094-.282-.358-.472-.655-.472H1.035c-.297 0-.56.19-.655.472l-.357 1.07c-.068.206.021.417.188.522.068.042.149.068.238.068h13.106c.088 0 .169-.026.237-.069.167-.105.257-.315.188-.521z"
-                                                                transform="translate(309)"
-                                                            />
-                                                        </g>
-                                                    </g>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </div>
+                );
+            }
+        } else if (tooltipFor == 'create') {
+            renderArr.push(
+                <div key="create" className="comn-tooltip tt__create-task">
+                    <div className="task-tooltip-inner">
+                        <p className="tt-text tt__ct-text">Create a task</p>
+                    </div>
+                </div>
+            );
+        } else {
+            let tasks =
+                    tooltipData.utils &&
+                    tooltipData.utils.hasOwnProperty('tasks') &&
+                    tooltipData.utils.tasks.length > 0
+                        ? tooltipData.utils.tasks
+                        : [],
+                taskItem = [];
+            tasks.map((task) => {
+                let description = task.description,
+                    _date = new Date(Math.floor(task.timestamp)),
+                    hours = getHour(_date),
+                    mins = getMins(_date),
+                    format = getFormat(_date),
+                    timeStr = `${hours} : ${mins} ${format.toUpperCase()}`,
+                    _key = keyGen();
+                if (tooltipFor == 'assign') {
+                    taskItem.push(
+                        <div key={keyGen()} className="task__info">
+                            <div className="task__info-inner">
+                                <div className="task__status">
+                                    <input
+                                        type="checkbox"
+                                        name={_key}
+                                        id={_key}
+                                    />
+                                    <label htmlFor={_key}></label>
                                 </div>
-                                <div className="task__info task__completed">
-                                    <div className="task__info-inner">
-                                        <div className="task__status">
-                                            <input
-                                                type="checkbox"
-                                                name="task__checkbox"
-                                                id="task__checkbox2"
-                                                defaultChecked
-                                            />
-                                            <label htmlFor="task__checkbox2" />
-                                        </div>
-                                        <div className="task__desc">
-                                            <h1 className="task__title">
-                                                Task title 1
-                                            </h1>
-                                            <p className="task__deadline">
-                                                02 : 20 PM
-                                            </p>
-                                        </div>
-                                        <div className="task__actions">
-                                            <a className="task__edit edit-task">
-                                                <svg
-                                                    className="dl-blk"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width={18}
-                                                    height={18}
-                                                    viewBox="0 0 18 18"
-                                                >
-                                                    <defs>
-                                                        <filter id="z1yte48lya">
-                                                            <feColorMatrix
-                                                                in="SourceGraphic"
-                                                                values="0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 1.000000 0"
-                                                            />
-                                                        </filter>
-                                                    </defs>
-                                                    <g
-                                                        fill="none"
-                                                        fillRule="evenodd"
-                                                        filter="url(#z1yte48lya)"
-                                                        transform="translate(-270)"
-                                                    >
-                                                        <g>
-                                                            <path
-                                                                fill="#FFF"
-                                                                fillRule="nonzero"
-                                                                d="M0 14.248L0 17.998 3.75 17.998 14.815 6.932 11.065 3.182zM17.705 2.627L15.37.293c-.39-.39-1.025-.39-1.415 0l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.026 0-1.416z"
-                                                                transform="translate(270)"
-                                                            />
-                                                        </g>
-                                                    </g>
-                                                </svg>
-                                            </a>
-                                            <a className="task__delete delete-task">
-                                                <svg
-                                                    className="dl-blk"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width={14}
-                                                    height={18}
-                                                    viewBox="0 0 14 18"
-                                                >
-                                                    <defs>
-                                                        <filter id="xqov8ytv0a">
-                                                            <feColorMatrix
-                                                                in="SourceGraphic"
-                                                                values="0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 1.000000 0"
-                                                            />
-                                                        </filter>
-                                                    </defs>
-                                                    <g
-                                                        fill="none"
-                                                        fillRule="evenodd"
-                                                        filter="url(#xqov8ytv0a)"
-                                                        transform="translate(-309)"
-                                                    >
-                                                        <g>
-                                                            <path
-                                                                fill="#FFF"
-                                                                fillRule="nonzero"
-                                                                d="M5.497 1.087h3.009v.506h1.086v-.577C9.592.456 9.137 0 8.577 0H5.426c-.56 0-1.015.456-1.015 1.016v.577h1.086v-.506zM12.101 5.897H1.902c-.28 0-.5.239-.477.518l.853 10.543c.047.589.538 1.042 1.128 1.042h7.191c.59 0 1.08-.453 1.128-1.042l.853-10.543c.023-.28-.197-.518-.477-.518zm-7.73 10.978l-.033.002c-.285 0-.524-.222-.542-.51L3.262 7.71c-.019-.3.209-.557.508-.576.299-.018.558.21.576.509L4.88 16.3c.019.3-.209.557-.508.575zm3.18-.542c0 .3-.243.543-.543.543-.3 0-.544-.243-.544-.543V7.677c0-.3.244-.543.544-.543.3 0 .543.243.543.543v8.656zm3.19-8.624l-.51 8.656c-.016.289-.256.511-.541.511h-.033c-.3-.018-.528-.275-.51-.575l.51-8.656c.018-.3.274-.528.574-.51.3.018.528.275.51.574zM13.98 4.22l-.357-1.069c-.094-.282-.358-.472-.655-.472H1.035c-.297 0-.56.19-.655.472l-.357 1.07c-.068.206.021.417.188.522.068.042.149.068.238.068h13.106c.088 0 .169-.026.237-.069.167-.105.257-.315.188-.521z"
-                                                                transform="translate(309)"
-                                                            />
-                                                        </g>
-                                                    </g>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </div>
+                                <div className="task__desc">
+                                    <h1 className="task__title">
+                                        {description}
+                                    </h1>
+                                    <p className="task__deadline">{timeStr}</p>
                                 </div>
-                                <div className="task__info">
-                                    <div className="task__info-inner">
-                                        <div className="task__status">
-                                            <input
-                                                type="checkbox"
-                                                name="task__checkbox"
-                                                id="task__checkbox3"
-                                            />
-                                            <label htmlFor="task__checkbox3" />
-                                        </div>
-                                        <div className="task__desc">
-                                            <h1 className="task__title">
-                                                Task title 1
-                                            </h1>
-                                            <p className="task__deadline">
-                                                02 : 20 PM
-                                            </p>
-                                        </div>
-                                        <div className="task__actions">
-                                            <a className="task__edit edit-task">
-                                                <svg
-                                                    className="dl-blk"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width={18}
-                                                    height={18}
-                                                    viewBox="0 0 18 18"
-                                                >
-                                                    <defs>
-                                                        <filter id="z1yte48lya">
-                                                            <feColorMatrix
-                                                                in="SourceGraphic"
-                                                                values="0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 1.000000 0"
-                                                            />
-                                                        </filter>
-                                                    </defs>
-                                                    <g
-                                                        fill="none"
-                                                        fillRule="evenodd"
-                                                        filter="url(#z1yte48lya)"
-                                                        transform="translate(-270)"
-                                                    >
-                                                        <g>
-                                                            <path
-                                                                fill="#FFF"
-                                                                fillRule="nonzero"
-                                                                d="M0 14.248L0 17.998 3.75 17.998 14.815 6.932 11.065 3.182zM17.705 2.627L15.37.293c-.39-.39-1.025-.39-1.415 0l-1.83 1.83 3.75 3.75 1.83-1.83c.39-.39.39-1.026 0-1.416z"
-                                                                transform="translate(270)"
-                                                            />
-                                                        </g>
-                                                    </g>
-                                                </svg>
-                                            </a>
-                                            <a className="task__delete delete-task">
-                                                <svg
-                                                    className="dl-blk"
-                                                    xmlns="http://www.w3.org/2000/svg"
-                                                    width={14}
-                                                    height={18}
-                                                    viewBox="0 0 14 18"
-                                                >
-                                                    <defs>
-                                                        <filter id="xqov8ytv0a">
-                                                            <feColorMatrix
-                                                                in="SourceGraphic"
-                                                                values="0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 0 1.000000 0 0 0 1.000000 0"
-                                                            />
-                                                        </filter>
-                                                    </defs>
-                                                    <g
-                                                        fill="none"
-                                                        fillRule="evenodd"
-                                                        filter="url(#xqov8ytv0a)"
-                                                        transform="translate(-309)"
-                                                    >
-                                                        <g>
-                                                            <path
-                                                                fill="#FFF"
-                                                                fillRule="nonzero"
-                                                                d="M5.497 1.087h3.009v.506h1.086v-.577C9.592.456 9.137 0 8.577 0H5.426c-.56 0-1.015.456-1.015 1.016v.577h1.086v-.506zM12.101 5.897H1.902c-.28 0-.5.239-.477.518l.853 10.543c.047.589.538 1.042 1.128 1.042h7.191c.59 0 1.08-.453 1.128-1.042l.853-10.543c.023-.28-.197-.518-.477-.518zm-7.73 10.978l-.033.002c-.285 0-.524-.222-.542-.51L3.262 7.71c-.019-.3.209-.557.508-.576.299-.018.558.21.576.509L4.88 16.3c.019.3-.209.557-.508.575zm3.18-.542c0 .3-.243.543-.543.543-.3 0-.544-.243-.544-.543V7.677c0-.3.244-.543.544-.543.3 0 .543.243.543.543v8.656zm3.19-8.624l-.51 8.656c-.016.289-.256.511-.541.511h-.033c-.3-.018-.528-.275-.51-.575l.51-8.656c.018-.3.274-.528.574-.51.3.018.528.275.51.574zM13.98 4.22l-.357-1.069c-.094-.282-.358-.472-.655-.472H1.035c-.297 0-.56.19-.655.472l-.357 1.07c-.068.206.021.417.188.522.068.042.149.068.238.068h13.106c.088 0 .169-.026.237-.069.167-.105.257-.315.188-.521z"
-                                                                transform="translate(309)"
-                                                            />
-                                                        </g>
-                                                    </g>
-                                                </svg>
-                                            </a>
-                                        </div>
-                                    </div>
+                                <div className="task__actions">
+                                    <a className="task__edit edit-task">
+                                        <EditIcon />
+                                    </a>
+                                    <a className="task__delete delete-task">
+                                        <DeleteIcon />
+                                    </a>
                                 </div>
                             </div>
                         </div>
+                    );
+                } else if (tooltipFor == 'completed') {
+                    taskItem.push(
+                        <div
+                            key={keyGen()}
+                            className="task__info task__completed"
+                        >
+                            <div className="task__info-inner">
+                                <div className="task__status">
+                                    <input
+                                        type="checkbox"
+                                        name={_key}
+                                        id={_key}
+                                    />
+                                    <label htmlFor={_key}></label>
+                                </div>
+                                <div className="task__desc">
+                                    <h1 className="task__title">
+                                        {description}
+                                    </h1>
+                                    <p className="task__deadline">{timeStr}</p>
+                                </div>
+                                <div className="task__actions">
+                                    <a className="task__delete delete-task">
+                                        <DeleteIcon />
+                                    </a>
+                                </div>
+                            </div>
+                        </div>
+                    );
+                } else {
+                    renderArr.push(<></>);
+                }
+            });
+            if (tasks && tasks.length > 0) {
+                renderArr.push(
+                    <div key={keyGen()} className="comn-tooltip tt__task-list">
+                        <div className="task-tooltip-inner">
+                            <div
+                                onClick={() => this.onHoverOutCommon()}
+                                className="closeTooltipBtn"
+                            >
+                                <CloseBtnIcon />
+                            </div>
+                            <div className="task-list-wrap">{taskItem}</div>
+                        </div>
                     </div>
+                );
+            }
+        }
+        return renderArr;
+    };
+
+    render() {
+        let allRow = this.renderCalenderUI();
+        let tooltipBody = this.renderTooltipBody();
+
+        return (
+            <div
+                className="app__action-three wrap__calendar-body"
+                onMouseLeave={this.onHoverOutCommon}
+            >
+                <table className="calender-viewport">
+                    <thead key={keyGen()} className="calender__header">
+                        <tr key="days" className="tabel__row">
+                            <th key="sun" className="weekday comn__cell">
+                                Sun
+                            </th>
+                            <th key="mon" className="weekday comn__cell">
+                                Mon
+                            </th>
+                            <th key="tue" className="weekday comn__cell">
+                                Tue
+                            </th>
+                            <th key="wed" className="weekday comn__cell">
+                                Wed
+                            </th>
+                            <th key="thu" className="weekday comn__cell">
+                                Thu
+                            </th>
+                            <th key="fri" className="weekday comn__cell">
+                                Fri
+                            </th>
+                            <th key="sat" className="weekday comn__cell">
+                                Sat
+                            </th>
+                        </tr>
+                    </thead>
+                    <tbody key="calendarbody" className="calender__body">
+                        {allRow}
+                    </tbody>
+                </table>
+                <div key="overlays" className="calender-overlay">
+                    {tooltipBody}
                 </div>
             </div>
         );
@@ -491,3 +490,29 @@ class CalendarBody extends Component {
 }
 
 export default CalendarBody;
+
+// {/* <span
+//     className="view-status-btn"
+//     data-task-status="completed"
+// />
+// <span
+//     className="view-status-btn"
+//     data-task-status="assign"
+// /> */}
+
+// return (
+//     <>
+//         <div className="comn-tooltip tt__create-task">
+//             <div className="task-tooltip-inner">
+//                 <p className="tt-text tt__ct-text">Create a task</p>
+//             </div>
+//         </div>
+//         <div className="comn-tooltip tt__holiday">
+//             <div className="task-tooltip-inner">
+//                 <p className="tt-text tt__holiday-text">
+//                     adadasdj adjas ja djasdj aawdadjaa adasd
+//                 </p>
+//             </div>
+//         </div>
+//     </>
+// );

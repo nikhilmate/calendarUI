@@ -141,8 +141,12 @@ class TaskUpdate extends Component {
             let curTime = new Date();
             switch (triggerType) {
                 case 'create':
-                    let tempHour = getFormatedHour(hour, format),
-                        temp1 = new Date(date).setHours(tempHour, min, 0),
+                    let tempHour = getFormatedHour(parseInt(hour), format),
+                        temp1 = new Date(date).setHours(
+                            parseInt(tempHour),
+                            parseInt(min),
+                            0
+                        ),
                         targetTime = new Date(temp1),
                         isValidDate = dateIsValid(targetTime, curTime);
                     if (isValidDate) {
@@ -156,6 +160,8 @@ class TaskUpdate extends Component {
                                 'XSRF-TOKEN': this.context.AppData.curfToken
                             }
                         });
+                    } else {
+                        this.setError('Please select date in future');
                     }
                     break;
                 case 'update':

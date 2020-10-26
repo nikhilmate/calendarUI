@@ -30,7 +30,11 @@ const initState = {
             month: null,
             year: null
         },
-        tooltipFor: null
+        tooltip: {
+            tooltipFor: null,
+            utils: null,
+            $elForTT: null
+        }
     }
 };
 
@@ -107,7 +111,7 @@ class AppProvider extends Component {
     contextReducer = (params) => {
         // reducer
         this.setState(ContextReducer(this.state, params));
-        console.log(params);
+        // console.log(params);
     };
 
     render() {

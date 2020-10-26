@@ -6,7 +6,7 @@
     position: absolute;
     top: 0;
     z-index: 1;
-    display: none;
+    /* display: none; */
 }
 
 .task-tooltip-inner {
@@ -160,11 +160,11 @@
 }
 
 .delete-task {
-    margin-left: 20px;
+    margin-left: auto;
 }
 
-.task__info.task__completed .edit-task {
-    display: none;
+.edit-task {
+    margin-right: 20px;
 }
 
 .task__info.task__completed .task__title {
@@ -213,4 +213,12 @@
 /* ie fixes */
 .ie_body select {
     background-image: none !important;
+}
+
+.closeTooltipBtn {
+    position: absolute;
+    right: -15px;
+    top: -5px;
+    z-index: 1;
+    cursor: pointer;
 }

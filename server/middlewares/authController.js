@@ -14,7 +14,7 @@ module.exports = {
                     errors: ['Incorrect email.']
                 });
             } else {
-                bcrypt.compare(password, userInstance.password, function (
+                bcrypt.compare(password, userInstance.password, async function (
                     err,
                     isMatch
                 ) {
@@ -31,9 +31,16 @@ module.exports = {
                         });
                     } else {
                         let _user = Object.assign({}, userInstance.get());
+                        _tasks = await userInstance.getTasks();
                         delete _user['password'];
                         delete _user['id'];
-                        req.body = Object.assign({}, _user);
+                        req.body = Object.assign(
+                            {},
+                            {
+                                user: _user,
+                                tasks: _tasks
+                            }
+                        );
                         return next();
                     }
                 });

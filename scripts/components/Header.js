@@ -44,6 +44,7 @@ class Header extends Component {
                         this.context.contextReducer({
                             type: 'signOut'
                         });
+                    window.location.reload();
                 } else {
                     console.log('could not signout');
                 }

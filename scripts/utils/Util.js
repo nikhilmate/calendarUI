@@ -173,3 +173,8 @@ export const dateIsValid = (targetDate, idealDate) => {
     }
     return true;
 };
+
+export const keyGen = () => {
+    let randNo = Math.random();
+    return Math.floor(new Date().getTime() * randNo);
+};

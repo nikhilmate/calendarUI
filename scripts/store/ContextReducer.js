@@ -4,7 +4,9 @@ const ACTION = {
     updateTaskList: 'updateTaskList',
     createTaskUpdate: 'createTaskUpdate',
     resetTaskUpdate: 'resetTaskUpdate',
-    changeCalendarView: 'changeCalendarView'
+    changeCalendarView: 'changeCalendarView',
+    updateTooltipInfo: 'updateTooltipInfo',
+    resetTooltipInfo: 'resetTooltipInfo'
 };
 
 const initialState = {
@@ -33,7 +35,11 @@ const initialState = {
             month: null,
             year: null
         },
-        tooltipFor: null
+        tooltip: {
+            tooltipFor: null,
+            utils: null,
+            $elForTT: null
+        }
     }
 };
 
@@ -41,23 +47,29 @@ export default (state, payload) => {
     if (payload.hasOwnProperty('type')) {
         switch (payload.type) {
             case ACTION.signIn:
-                const { user } = payload;
+                let { user } = payload,
+                    _tasks = payload.tasks;
                 return Object.assign({}, state, {
                     userDetails: Object.assign({}, state.userDetails, {
                         email: user.email
+                    }),
+                    taskManager: Object.assign({}, state.taskManager, {
+                        tasks: _tasks
                     }),
                     isLogged: true
                 });
 
             case ACTION.updateTaskList:
-                const { tasks } = payload;
-                return Object.assign({}, state, { tasks });
+                let { tasks } = payload;
+                return Object.assign({}, state, {
+                    taskManager: { tasks }
+                });
 
             case ACTION.signOut:
                 return Object.assign({}, initialState);
 
             case ACTION.createTaskUpdate:
-                const timestamp = payload.hasOwnProperty('timestamp')
+                let timestamp = payload.hasOwnProperty('timestamp')
                         ? payload.timestamp
                         : state.taskState.createTaskDetails.timestamp,
                     triggerType = payload.hasOwnProperty('triggerType')
@@ -116,6 +128,33 @@ export default (state, payload) => {
                 return Object.assign({}, state, {
                     calendarState: Object.assign({}, state.calendarState, {
                         currentView: { month, year }
+                    })
+                });
+
+            case ACTION.updateTooltipInfo:
+                let tooltipFor = payload.hasOwnProperty('tooltipFor')
+                        ? payload.tooltipFor
+                        : null,
+                    utils = payload.hasOwnProperty('utils')
+                        ? payload.utils
+                        : null,
+                    $elForTT = payload.hasOwnProperty('$elForTT')
+                        ? payload.$elForTT
+                        : null;
+                return Object.assign({}, state, {
+                    calendarState: Object.assign({}, state.calendarState, {
+                        tooltip: { tooltipFor, utils, $elForTT }
+                    })
+                });
+
+            case ACTION.resetTooltipInfo:
+                return Object.assign({}, state, {
+                    calendarState: Object.assign({}, state.calendarState, {
+                        tooltip: {
+                            tooltipFor: null,
+                            utils: null,
+                            $elForTT: null
+                        }
                     })
                 });
 

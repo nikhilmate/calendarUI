@@ -81,7 +81,8 @@ class UserActionWidget extends Component {
                                     type: 'signIn',
                                     user: {
                                         email: res.user.email
-                                    }
+                                    },
+                                    tasks: res.tasks
                                 });
                         } else if (!res.success && !!res.errors) {
                             this.setState({
