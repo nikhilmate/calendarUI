@@ -17,7 +17,7 @@
 .create-task-widget {
     max-width: 550px;
     width: 100%;
-    margin: 40px auto 0;
+    margin: 80px auto 0;
     padding: 20px;
     border-radius: 6px;
     background-color: #fff;
@@ -204,4 +204,21 @@
     text-align: center;
     margin-top: 10px;
     color: red;
+}
+
+.react-datepicker__current-month {
+    display: none;
+}
+
+.react-datepicker__month-select,
+.react-datepicker__year-select {
+    display: inline-flex;
+    align-items: center;
+    padding: 2px 10px;
+    border: 1px solid #aeaeae;
+    border-radius: 2px;
+    cursor: pointer;
+}
+.react-datepicker__month-select {
+    margin-right: 3px;
 }

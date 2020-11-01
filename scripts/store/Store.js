@@ -23,17 +23,17 @@ const initState = {
             min: null,
             format: null,
             error: null
+        },
+        taskWidget: {
+            ts: null,
+            tf: null,
+            makeVisible: false
         }
     },
     calendarState: {
         currentView: {
             month: null,
             year: null
-        },
-        tooltip: {
-            tooltipFor: null,
-            utils: null,
-            $elForTT: null
         }
     }
 };

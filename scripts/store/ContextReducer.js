@@ -5,8 +5,8 @@ const ACTION = {
     createTaskUpdate: 'createTaskUpdate',
     resetTaskUpdate: 'resetTaskUpdate',
     changeCalendarView: 'changeCalendarView',
-    updateTooltipInfo: 'updateTooltipInfo',
-    resetTooltipInfo: 'resetTooltipInfo'
+    updateTaskWidget: 'updateTaskWidget',
+    resetTaskWidget: 'resetTaskWidget'
 };
 
 const initialState = {
@@ -28,17 +28,17 @@ const initialState = {
             min: null,
             format: null,
             error: null
+        },
+        taskWidget: {
+            ts: null,
+            tf: null,
+            makeVisible: false
         }
     },
     calendarState: {
         currentView: {
             month: null,
             year: null
-        },
-        tooltip: {
-            tooltipFor: null,
-            utils: null,
-            $elForTT: null
         }
     }
 };
@@ -131,30 +131,26 @@ export default (state, payload) => {
                     })
                 });
 
-            case ACTION.updateTooltipInfo:
-                let tooltipFor = payload.hasOwnProperty('tooltipFor')
-                        ? payload.tooltipFor
-                        : null,
-                    utils = payload.hasOwnProperty('utils')
-                        ? payload.utils
-                        : null,
-                    $elForTT = payload.hasOwnProperty('$elForTT')
-                        ? payload.$elForTT
-                        : null;
+            case ACTION.updateTaskWidget:
+                let ts = payload.hasOwnProperty('ts')
+                        ? payload.ts
+                        : state.taskState.taskWidget.ts,
+                    tf = payload.hasOwnProperty('tf')
+                        ? payload.tf
+                        : state.taskState.taskWidget.tf,
+                    makeVisible = payload.hasOwnProperty('makeVisible')
+                        ? payload.makeVisible
+                        : state.taskState.taskWidget.makeVisible;
                 return Object.assign({}, state, {
-                    calendarState: Object.assign({}, state.calendarState, {
-                        tooltip: { tooltipFor, utils, $elForTT }
+                    taskState: Object.assign({}, state.taskState, {
+                        taskWidget: { ts, tf, makeVisible }
                     })
                 });
 
-            case ACTION.resetTooltipInfo:
+            case ACTION.resetTaskWidget:
                 return Object.assign({}, state, {
-                    calendarState: Object.assign({}, state.calendarState, {
-                        tooltip: {
-                            tooltipFor: null,
-                            utils: null,
-                            $elForTT: null
-                        }
+                    taskState: Object.assign({}, state.taskState, {
+                        taskWidget: { ts: null, tf: null, makeVisible: false }
                     })
                 });
 

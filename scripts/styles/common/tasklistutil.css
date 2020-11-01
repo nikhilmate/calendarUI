@@ -1,0 +1,288 @@
+/* create task overlay */
+.taskListUtil {
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background-color: rgba(77, 77, 77, 0.85);
+    position: absolute;
+}
+
+.wrap__tasklist-util {
+    max-width: 520px;
+    width: 100%;
+    margin: 80px auto 0;
+    border-radius: 6px;
+    background-color: #fff;
+    height: 343px;
+    position: relative;
+}
+.btn__tasklist-util-close {
+    position: absolute;
+    top: 10px;
+    right: 10px;
+    z-index: 1;
+    cursor: pointer;
+}
+.btn__tasklist-util-close:hover svg path {
+    fill: #444;
+    stroke: #444;
+}
+
+.wrap__comn-detail {
+    display: none;
+}
+.wrap__comn-detail.tabActive {
+    display: block;
+}
+.wrap__tabs-categ {
+    width: 100%;
+    display: flex;
+    padding: 20px 20px 0;
+    position: relative;
+}
+.wrap__tabs-categ:after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    width: calc(100% - 40px);
+    left: 20px;
+    border-bottom: 2px solid rgba(211, 218, 226, .63);
+}
+.wrap__task-status {
+    padding: 0 20px;
+    margin: 12px 0 10px;
+    display: flex;
+    justify-content: space-between;
+}
+.wrap__tab-link {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #a6acb6;
+    padding: 10px 30px 10px 10px;
+    display: inline-flex;
+    cursor: pointer;
+    position: relative;
+    transition: .4s ease all;
+}
+.wrap__tab-link.tabActive {
+    color: rgb(70, 70, 70);
+}
+.wrap__tab-link.tabActive:after {
+    content: "";
+    position: absolute;
+    bottom: -2px;
+    left: 0;
+    width: 100%;
+    border-bottom: 3px solid #29d532;
+}
+
+.select__task-status {
+    height: 38px;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    color: #000;
+    font-weight: 400;
+    display: flex;
+    align-items: center;
+    padding: 6px 20px;
+    border-radius: 2px;
+    border: solid 1px rgba(211, 218, 226, .63);
+    background-color: rgba(237, 241, 244, .42);
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='18' height='9' viewBox='0 0 18 9'%3E%3Cpath fill='%23909CA7' d='M16.72 1.308L9.558 8.47c-.293.293-.767.293-1.06 0L1.336 1.308c-.292-.293-.292-.767 0-1.06.141-.141.332-.22.53-.22H16.19c.415 0 .75.336.75.75 0 .199-.079.39-.22.53z'/%3E%3C/svg%3E%0A");
+    background-repeat: no-repeat;
+    background-size: 12px 9px;
+    background-position: right 8px center;
+    position: relative;
+    cursor: pointer;
+    transition: all .3s ease;
+}
+.select__task-status:hover,
+.select__task-status:focus {
+    border: solid 1px #666;
+    background-color: #fff;
+}
+
+/* task list */
+.wrap__task-list {
+    padding: 0 20px;
+    background-color: rgb(237, 241, 244, 0.6);
+    border-top: 2px solid #85a9cf;
+    height: 218px;
+    overflow: auto;
+}
+.wrap__task-item {
+    position: relative;
+    width: 100%;
+    padding: 16px 0;
+}
+
+.wrap__task-item:not(:last-child) {
+    border-bottom: 1px solid #cbd0d8;
+}
+
+.wrap__task-item-inner {
+    width: 100%;
+    display: flex;
+}
+
+.wrap__task-item-inner .wrap__ti-status {
+    position: relative;
+    width: 18px;
+    height: 18px;
+    margin-top: 2px;
+}
+
+.wrap__ti-status label {
+    width: 18px;
+    height: 18px;
+    box-shadow: inset 0 0 4px 0 rgb(0 0 0 / 0.05);
+    border: solid 1px #8ba5c1;
+    background-image: radial-gradient(#ffffff 24%, #05488b75 90%);
+    border-radius: 50%;
+    cursor: pointer;
+    left: 0;
+    position: absolute;
+    top: 0;
+}
+
+.wrap__ti-status label:after {
+    border: 2px solid #fff;
+    border-top: none;
+    border-right: none;
+    content: "";
+    height: 6px;
+    left: 2px;
+    opacity: 0;
+    position: absolute;
+    top: 4px;
+    transform: rotate(-45deg);
+    width: 12px;
+}
+
+.wrap__ti-status input[type="checkbox"] {
+    visibility: hidden;
+}
+
+.wrap__ti-status input[type="checkbox"]:checked+label {
+    border-color: #66bb6a;
+    background: #66bb6a;
+    background-image: none;
+    box-shadow: none;
+}
+
+.wrap__ti-status input[type="checkbox"]:checked+label:after {
+    opacity: 1;
+}
+
+.ti-title {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    font-weight: 500;
+    color: #333;
+    white-space: nowrap;
+    text-overflow: ellipsis;
+    overflow: hidden;
+}
+
+.wrap__ti-desc {
+    flex: 1 0 auto;
+    margin: 0 10px;
+    width: 220px;
+}
+
+.wrap__ti-action a {
+    cursor: pointer;
+    display: inline-flex;
+}
+.wrap__ti-action a svg {
+    display: block;
+}
+.wrap__ti-action a:hover svg path {
+    fill: #777;
+}
+.ti-deadline {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 14px;
+    font-weight: 400;
+    color: #555;
+    margin-top: 5px;
+}
+
+.btn__ti-delete {
+    margin-left: auto;
+}
+
+.btn__ti-edit {
+    margin-right: 20px;
+}
+
+.wrap__task-item.task__completed .ti-title {
+    color: #bfc4c8;
+    text-decoration: line-through;
+}
+
+.wrap__task-item.task__completed label {
+    border-color: #66bb6a;
+    background: #66bb6a;
+    background-image: none;
+    box-shadow: none;
+}
+
+.wrap__task-item.task__completed label:after {
+    opacity: 1;
+}
+
+.wrap__tasklist-util ::-webkit-scrollbar {
+    width: 6px;
+}
+
+/* Track */
+.wrap__tasklist-util ::-webkit-scrollbar-track {
+    background: #dfe3e6;
+}
+
+/* Handle */
+.wrap__tasklist-util ::-webkit-scrollbar-thumb {
+    border-radius: 2px;
+    background: #b8b6b6;
+}
+
+/* Handle on hover */
+.wrap__tasklist-util ::-webkit-scrollbar-thumb:hover {
+    background: #777;
+}
+
+
+/* notes */
+.wrap__not-found {
+    padding-top: 50px;
+}
+.wrap__nf-icon {
+    display: block;
+    text-align: center;
+}
+.wrap__nf-desc {
+    color: #b8b6b6;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 18px;
+    margin-top: 5px;
+    font-weight: 500;
+    text-align: center;
+}
+
+.wrap__task-date-picker {
+    position: relative;
+    width: 190px;
+    display: inline-flex;
+    align-items: center;
+    height: 38px;
+    border-radius: 4px;
+    border: solid 0.8px rgba(211, 218, 226, 0.63);
+    background-color: rgba(237, 241, 244, 0.42);
+}
+.wrap__task-date-picker .date__picker-arrow {
+    right: 15px;
+}
