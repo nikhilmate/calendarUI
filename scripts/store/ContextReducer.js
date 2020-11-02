@@ -27,7 +27,8 @@ const initialState = {
             hour: null,
             min: null,
             format: null,
-            error: null
+            error: null,
+            id: null
         },
         taskWidget: {
             ts: null,
@@ -44,6 +45,23 @@ const initialState = {
 };
 
 export default (state, payload) => {
+    let stepState = Object.assign(state);
+    try {
+        if (payload instanceof Array) {
+            payload.map((payloadObj) => {
+                const nextState = setStateInContext(stepState, payloadObj);
+                stepState = Object.assign(nextState);
+            });
+        } else {
+            stepState = setStateInContext(stepState, payload);
+        }
+    } catch (error) {
+        console.log(error);
+    }
+    return stepState;
+};
+
+const setStateInContext = (state, payload) => {
     if (payload.hasOwnProperty('type')) {
         switch (payload.type) {
             case ACTION.signIn:
@@ -92,7 +110,10 @@ export default (state, payload) => {
                         : state.taskState.createTaskDetails.format,
                     error = payload.hasOwnProperty('error')
                         ? payload.error
-                        : state.taskState.createTaskDetails.error;
+                        : state.taskState.createTaskDetails.error,
+                    id = payload.hasOwnProperty('id')
+                        ? payload.id
+                        : state.taskState.createTaskDetails.id;
                 return Object.assign({}, state, {
                     taskState: Object.assign({}, state.taskState, {
                         createTaskDetails: {
@@ -103,7 +124,8 @@ export default (state, payload) => {
                             hour,
                             min,
                             format,
-                            error
+                            error,
+                            id
                         }
                     })
                 });

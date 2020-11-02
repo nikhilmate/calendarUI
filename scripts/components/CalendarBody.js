@@ -182,7 +182,7 @@ class CalendarBody extends Component {
                                     <>
                                         {isHolidayCheck && (
                                             <span
-                                                data-for="tooltip"
+                                                data-for="holiday"
                                                 data-tip={isHolidayCheck}
                                                 key={keyGen()}
                                                 className="view-status-btn"
@@ -290,6 +290,14 @@ class CalendarBody extends Component {
                     key={keyGen()}
                     place="top"
                     id="tooltip"
+                    type="dark"
+                    effect="solid"
+                />
+                <ReactTooltip
+                    key={keyGen()}
+                    place="top"
+                    id="holiday"
+                    class="holiday-tt"
                     type="dark"
                     effect="solid"
                 />

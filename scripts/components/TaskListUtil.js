@@ -15,6 +15,7 @@ import { getMins, getHour, getFormat, keyGen } from '../utils/Util';
 import DatePickerComp from 'react-datepicker';
 import CustomDateInput from './CustomDateInput';
 import { FilterTasks } from '../utils/Filter';
+import { deleteTask, getTaskDetails, updateTask } from '../utils/ApiActions';
 
 class TaskListUtil extends Component {
     constructor(props) {
@@ -53,9 +54,8 @@ class TaskListUtil extends Component {
                             type="checkbox"
                             name={_key}
                             id={_key}
-                            // onClick={() =>
-                            //     this.statusTaskHandler(task.id)
-                            // }
+                            defaultChecked={isComplete}
+                            onClick={(e) => this.statusTaskHandler(e, task.id)}
                         />
                         <label htmlFor={_key}></label>
                     </div>
@@ -67,24 +67,20 @@ class TaskListUtil extends Component {
                         {!isComplete && (
                             <a
                                 className="btn__ti-edit"
-                                // onClick={() =>
-                                //     this.editTaskHandler(
-                                //         task.id,
-                                //         task.timestamp
-                                //     )
-                                // }
+                                onClick={() =>
+                                    this.editTaskHandler(
+                                        task.id,
+                                        task.timestamp,
+                                        description
+                                    )
+                                }
                             >
                                 <EditIcon />
                             </a>
                         )}
                         <a
                             className="btn__ti-delete"
-                            // onClick={() =>
-                            //     this.deleteTaskHandler(
-                            //         task.id,
-                            //         task.timestamp
-                            //     )
-                            // }
+                            onClick={() => this.deleteTaskHandler(task.id)}
                         >
                             <DeleteIcon />
                         </a>
@@ -115,7 +111,7 @@ class TaskListUtil extends Component {
                     );
                 });
                 break;
-            case 'finished':
+            case 'complete':
                 finishedTasks.map((task) => {
                     let tempTasks = this.taskListItem(task);
                     tooltipContent.push(
@@ -150,6 +146,156 @@ class TaskListUtil extends Component {
             });
     };
 
+    tabsCategHandler = (categ) => {
+        if (['tasks', 'notes'].indexOf(categ) !== -1) {
+            typeof this.context.contextReducer == 'function' &&
+                this.context.contextReducer({
+                    type: 'updateTaskWidget',
+                    makeVisible: categ
+                });
+        }
+    };
+
+    taskStatusHandler = (status) => {
+        if (status) {
+            let tempStatus = ['all', 'assign', 'complete'].filter(
+                (__status) => {
+                    return status.toLowerCase().includes(__status);
+                }
+            );
+            typeof this.context.contextReducer == 'function' &&
+                this.context.contextReducer({
+                    type: 'updateTaskWidget',
+                    tf: tempStatus[0] ? tempStatus[0] : 'assign'
+                });
+        }
+    };
+
+    editTaskHandler = (id, timestamp, description) => {
+        timestamp = Math.floor(timestamp);
+        let now = new Date(timestamp),
+            min = getMins(now),
+            hour = getHour(now),
+            format = getFormat(now),
+            date = now;
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer([
+                {
+                    type: 'createTaskUpdate',
+                    triggerType: 'update',
+                    timestamp,
+                    description,
+                    min,
+                    hour,
+                    format,
+                    date,
+                    id
+                },
+                {
+                    type: 'resetTaskWidget'
+                }
+            ]);
+    };
+
+    datePickerHandler = (date) => {
+        if (date) {
+            let ts = new Date(date),
+                tempDate = ts ? ts.getTime() : new Date().getTime();
+            typeof this.context.contextReducer == 'function' &&
+                this.context.contextReducer({
+                    type: 'updateTaskWidget',
+                    ts: tempDate
+                });
+        }
+    };
+
+    statusTaskHandler = (e, id) => {
+        try {
+            let token = this.context.AppData.curfToken,
+                isFinished = !!e.currentTarget.checked ? true : false;
+            if (token) {
+                const config = {
+                    body: {
+                        task_id: id,
+                        isFinished
+                    },
+                    headers: {
+                        'XSRF-TOKEN': token
+                    }
+                };
+                updateTask(config)
+                    .then((res) => {
+                        if (res.hasOwnProperty('success')) {
+                            if (res.success == true) {
+                                this.fetchAllTasks();
+                            } else if (res.success == false && !!res.errors) {
+                                console.log(res);
+                            }
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    fetchAllTasks = () => {
+        try {
+            getTaskDetails()
+                .then((res) => {
+                    if (res.hasOwnProperty('success')) {
+                        if (!!res.success) {
+                            this.context.contextReducer({
+                                type: 'updateTaskList',
+                                tasks: res.tasks
+                            });
+                        } else if (!res.success && !!res.errors) {
+                            console.log(res);
+                        }
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                });
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
+    deleteTaskHandler = (id) => {
+        let token = this.context.AppData.curfToken;
+        try {
+            if (id && token) {
+                const config = {
+                    body: {
+                        task_id: id
+                    },
+                    headers: {
+                        'XSRF-TOKEN': token
+                    }
+                };
+                deleteTask(config)
+                    .then((res) => {
+                        if (res.hasOwnProperty('success')) {
+                            if (res.success == true) {
+                                this.fetchAllTasks();
+                            } else if (res.success == false && !!res.errors) {
+                                console.log(res);
+                            }
+                        }
+                    })
+                    .catch((err) => {
+                        console.log(err);
+                    });
+            }
+        } catch (error) {
+            console.log(error);
+        }
+    };
+
     render() {
         let { ts, tf, makeVisible } = this.context.AppData.taskState.taskWidget,
             tempVisible = !makeVisible ? 'tasks' : makeVisible;
@@ -171,7 +317,9 @@ class TaskListUtil extends Component {
         return (
             <div
                 className="calender-action-4 taskListUtil"
-                style={{ display: makeVisible ? 'block' : 'none' }}
+                style={{
+                    display: makeVisible ? 'block' : 'none'
+                }}
             >
                 <div className="wrap__tasklist-util">
                     <div
@@ -182,6 +330,7 @@ class TaskListUtil extends Component {
                     </div>
                     <div className="wrap__tabs-categ">
                         <div
+                            onClick={() => this.tabsCategHandler('tasks')}
                             className={
                                 'wrap__tab-link ' +
                                 (tempVisible === 'tasks' && 'tabActive')
@@ -190,6 +339,7 @@ class TaskListUtil extends Component {
                             Tasks
                         </div>
                         <div
+                            onClick={() => this.tabsCategHandler('notes')}
                             className={
                                 'wrap__tab-link ' +
                                 (tempVisible === 'notes' && 'tabActive')
@@ -206,56 +356,54 @@ class TaskListUtil extends Component {
                                 (tempVisible == 'tasks' && 'tabActive')
                             }
                         >
-                            {tempTasks && tempTasks.length > 0 ? (
-                                <div className="wrap__tmp1">
-                                    <div className="wrap__task-status">
-                                        <div className="wrap__select-task-status">
-                                            <Select
-                                                className="select__task-status"
-                                                name="select__task-status"
-                                                id="select__task-status"
-                                                options={this.taskStatus}
-                                                defaultOption={tempStatusOption}
-                                                onChangeHandler={(e) =>
-                                                    console.log(e)
-                                                }
-                                            />
-                                        </div>
-                                        <div className="wrap__task-date-picker">
-                                            <span className="date__picker-ico inline-flx">
-                                                <DatePickerIcon />
-                                            </span>
-                                            <DatePickerComp
-                                                selected={tempDate}
-                                                onChange={(date) =>
-                                                    console.log(date)
-                                                }
-                                                showMonthDropdown
-                                                showYearDropdown
-                                                dropdownMode="select"
-                                                customInput={
-                                                    <CustomDateInput />
-                                                }
-                                            />
-                                            <span className="date__picker-arrow inline-flx">
-                                                <DownArrow />
-                                            </span>
-                                        </div>
+                            <div className="wrap__tmp1">
+                                <div className="wrap__task-status">
+                                    <div className="wrap__select-task-status">
+                                        <Select
+                                            className="select__task-status"
+                                            name="select__task-status"
+                                            id="select__task-status"
+                                            options={this.taskStatus}
+                                            defaultOption={tempStatusOption}
+                                            onChangeHandler={(e) =>
+                                                this.taskStatusHandler(e)
+                                            }
+                                        />
                                     </div>
+                                    <div className="wrap__task-date-picker">
+                                        <span className="date__picker-ico inline-flx">
+                                            <DatePickerIcon />
+                                        </span>
+                                        <DatePickerComp
+                                            selected={tempDate}
+                                            onChange={(date) =>
+                                                this.datePickerHandler(date)
+                                            }
+                                            showMonthDropdown
+                                            showYearDropdown
+                                            dropdownMode="select"
+                                            customInput={<CustomDateInput />}
+                                        />
+                                        <span className="date__picker-arrow inline-flx">
+                                            <DownArrow />
+                                        </span>
+                                    </div>
+                                </div>
+                                {tempTasks && tempTasks.length > 0 ? (
                                     <div className="wrap__task-list">
                                         {taskList}
                                     </div>
-                                </div>
-                            ) : (
-                                <div className="wrap__not-found">
-                                    <div className="wrap__nf-icon">
-                                        <TaskListIcon />
+                                ) : (
+                                    <div className="wrap__not-found">
+                                        <div className="wrap__nf-icon">
+                                            <TaskListIcon />
+                                        </div>
+                                        <h1 className="wrap__nf-desc">
+                                            Not Found.
+                                        </h1>
                                     </div>
-                                    <h1 className="wrap__nf-desc">
-                                        Not Found.
-                                    </h1>
-                                </div>
-                            )}
+                                )}
+                            </div>
                         </div>
                         <div
                             key={keyGen()}

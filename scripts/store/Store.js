@@ -22,7 +22,8 @@ const initState = {
             hour: null,
             min: null,
             format: null,
-            error: null
+            error: null,
+            id: null
         },
         taskWidget: {
             ts: null,
