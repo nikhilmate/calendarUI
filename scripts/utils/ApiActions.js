@@ -7,6 +7,8 @@ const URL = {
     isLogged: '/api/user/isLogged',
     logout: '/api/user/logout',
     createTask: '/api/task/create',
+    updateTask: '/api/task/update',
+    deleteTask: '/api/task/delete',
     getTaskDetails: '/api/task/all'
 };
 
@@ -90,6 +92,40 @@ export const createTask = (payload) => {
     });
     var promise = new Promise(function (resolve, reject) {
         Xhr(URL.createTask, config)
+            .then((res) => {
+                resolve(res);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+    return promise;
+};
+
+export const updateTask = (payload) => {
+    const config = Object.assign({}, payload, {
+        method: 'POST'
+    });
+    var promise = new Promise(function (resolve, reject) {
+        Xhr(URL.updateTask, config)
+            .then((res) => {
+                resolve(res);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+    return promise;
+};
+
+export const deleteTask = (payload) => {
+    const config = Object.assign({}, payload, {
+        method: 'POST'
+    });
+    var promise = new Promise(function (resolve, reject) {
+        Xhr(URL.deleteTask, config)
             .then((res) => {
                 resolve(res);
             })

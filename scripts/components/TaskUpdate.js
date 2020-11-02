@@ -14,7 +14,7 @@ import {
 import DatePickerComp from 'react-datepicker';
 import CustomDateInput from './CustomDateInput';
 import AppContext from '../store/AppContext';
-import { createTask, getTaskDetails } from '../utils/ApiActions';
+import { createTask, getTaskDetails, updateTask } from '../utils/ApiActions';
 
 class TaskUpdate extends Component {
     constructor(props) {
@@ -74,6 +74,7 @@ class TaskUpdate extends Component {
     };
 
     createTaskXHR = (config) => {
+        let noFoundError = `Couldn't create task. Please try again.`;
         try {
             createTask(config)
                 .then((res) => {
@@ -82,23 +83,46 @@ class TaskUpdate extends Component {
                             this.fetchAllTasks();
                             this.cancelCreateTaskHandler();
                         } else if (res.success == false && !!res.errors) {
-                            this.setError(
-                                `Couldn't create task. Please try again`
-                            );
+                            this.setError(noFoundError);
                         }
                     }
                 })
                 .catch((err) => {
                     console.log(err);
-                    this.setError(`Couldn't create task. Please try again`);
+                    this.setError(noFoundError);
                 });
         } catch (error) {
             console.log(error);
-            this.setError(`Couldn't create task. Please try again.`);
+            this.setError(noFoundError);
+        }
+    };
+
+    updateTaskXHR = (config) => {
+        let noFoundError = `Couldn't update the task. Please try again.`;
+        try {
+            updateTask(config)
+                .then((res) => {
+                    if (res.hasOwnProperty('success')) {
+                        if (res.success == true) {
+                            this.fetchAllTasks();
+                            this.cancelCreateTaskHandler();
+                        } else if (res.success == false && !!res.errors) {
+                            this.setError(noFoundError);
+                        }
+                    }
+                })
+                .catch((err) => {
+                    console.log(err);
+                    this.setError(noFoundError);
+                });
+        } catch (error) {
+            console.log(error);
+            this.setError(noFoundError);
         }
     };
 
     fetchAllTasks = () => {
+        let noFoundError = `Couldn't fetch tasks. Please try again.`;
         try {
             getTaskDetails()
                 .then((res) => {
@@ -109,19 +133,17 @@ class TaskUpdate extends Component {
                                 tasks: res.tasks
                             });
                         } else if (!res.success && !!res.errors) {
-                            this.setError(
-                                `Couldn't fetch tasks. Please try again`
-                            );
+                            this.setError(noFoundError);
                         }
                     }
                 })
                 .catch((err) => {
                     console.log(err);
-                    this.setError(`Couldn't fetch tasks. Please try again`);
+                    this.setError(noFoundError);
                 });
         } catch (error) {
             console.log(error);
-            this.setError(`Couldn't fetch tasks. Please try again.`);
+            this.setError(noFoundError);
         }
     };
 
@@ -132,7 +154,8 @@ class TaskUpdate extends Component {
             date,
             hour,
             min,
-            format
+            format,
+            id
         } = this.context.AppData.taskState.createTaskDetails;
         let isValid = createTaskValidation(
             this.context.AppData.taskState.createTaskDetails
@@ -141,19 +164,19 @@ class TaskUpdate extends Component {
             let curTime = new Date();
             switch (triggerType) {
                 case 'create':
-                    let tempHour = getFormatedHour(parseInt(hour), format),
+                    let tempHour1 = getFormatedHour(parseInt(hour), format),
                         temp1 = new Date(date).setHours(
-                            parseInt(tempHour),
+                            parseInt(tempHour1),
                             parseInt(min),
                             0
                         ),
-                        targetTime = new Date(temp1),
-                        isValidDate = dateIsValid(targetTime, curTime);
+                        targetTime1 = new Date(temp1),
+                        isValidDate = dateIsValid(targetTime1, curTime);
                     if (isValidDate) {
                         this.createTaskXHR({
                             body: {
                                 description,
-                                timestamp: targetTime.getTime(),
+                                timestamp: targetTime1.getTime(),
                                 isFinished: false
                             },
                             headers: {
@@ -165,7 +188,26 @@ class TaskUpdate extends Component {
                     }
                     break;
                 case 'update':
-
+                    let tempHour2 = getFormatedHour(parseInt(hour), format),
+                        temp2 = new Date(date).setHours(
+                            parseInt(tempHour2),
+                            parseInt(min),
+                            0
+                        ),
+                        targetTime2 = new Date(temp2);
+                    if (description && targetTime2 && id) {
+                        this.updateTaskXHR({
+                            body: {
+                                task_id: id,
+                                description,
+                                timestamp: targetTime2.getTime(),
+                                isFinished: false
+                            },
+                            headers: {
+                                'XSRF-TOKEN': this.context.AppData.curfToken
+                            }
+                        });
+                    } else this.setError('Please enter the valid details');
                 default:
                     break;
             }
@@ -202,7 +244,7 @@ class TaskUpdate extends Component {
                 format,
                 error
             } = this.context.AppData.taskState.createTaskDetails,
-            now = !!timestamp ? timestamp : tempNow.getTime(),
+            now = !!timestamp ? Math.floor(timestamp) : tempNow.getTime(),
             nowDate = new Date(now),
             newState = {
                 currentMin: getMins(nowDate),

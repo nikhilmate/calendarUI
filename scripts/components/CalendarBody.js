@@ -1,5 +1,6 @@
 import React, { Component } from 'react';
-import { PlusLogo, DeleteIcon, EditIcon, CloseBtnIcon } from '../utils/Icons';
+import ReactTooltip from 'react-tooltip';
+import { PlusLogo } from '../utils/Icons';
 import {
     getDaysInMonth,
     getTitleDate,
@@ -11,6 +12,7 @@ import {
     keyGen
 } from '../utils/Util';
 import AppContext from '../store/AppContext';
+import { FilterTasks } from '../utils/Filter';
 
 class CalendarBody extends Component {
     constructor(props) {
@@ -36,85 +38,9 @@ class CalendarBody extends Component {
             });
     };
 
-    onHoverOfHoliday = (e, holidayName) => {
-        typeof this.context.contextReducer == 'function' &&
-            this.context.contextReducer({
-                type: 'updateTooltipInfo',
-                tooltipFor: 'holiday',
-                utils: {
-                    holiday: holidayName
-                },
-                $elForTT: e.currentTarget
-            });
-    };
-
-    onHoverOfCreateTask = (e) => {
-        typeof this.context.contextReducer == 'function' &&
-            this.context.contextReducer({
-                type: 'updateTooltipInfo',
-                tooltipFor: 'create',
-                $elForTT: e.currentTarget
-            });
-    };
-
-    onHoverOutCommon = () => {
-        typeof this.context.contextReducer == 'function' &&
-            this.context.contextReducer({
-                type: 'resetTooltipInfo'
-            });
-    };
-
-    filterTasks = (timstamp, type) => {
-        if (timstamp) {
-            let tasks = this.context.AppData.taskManager.tasks.filter(
-                (task) => {
-                    let taskTS = task.timestamp
-                        ? Math.floor(task.timestamp)
-                        : null;
-                    if (taskTS) {
-                        let taskDate = new Date(taskTS),
-                            derivedTS = new Date(
-                                taskDate.getFullYear(),
-                                taskDate.getMonth(),
-                                taskDate.getDate()
-                            ).getTime();
-                        if (derivedTS == timstamp) return true;
-                        else return false;
-                    } else return false;
-                }
-            );
-            switch (type) {
-                case 'assign':
-                    let assignTasks = tasks.filter((task) => {
-                        if (!JSON.parse(task.isFinished)) {
-                            return true;
-                        } else return false;
-                    });
-                    return assignTasks;
-                case 'complete':
-                    let completeTasks = tasks.filter((task) => {
-                        if (JSON.parse(task.isFinished)) {
-                            return true;
-                        } else return false;
-                    });
-                    return completeTasks;
-                default:
-                    return [];
-            }
-        }
-        return [];
-    };
-
-    onHoverOfTasks = (e, type, taskArr) => {
-        typeof this.context.contextReducer == 'function' &&
-            this.context.contextReducer({
-                type: 'updateTooltipInfo',
-                tooltipFor: type,
-                utils: {
-                    tasks: taskArr
-                },
-                $elForTT: e.currentTarget
-            });
+    filterTasks = (timestamp, type) => {
+        let tasks = this.context.AppData.taskManager.tasks;
+        return FilterTasks({ tasks, timestamp, type });
     };
 
     renderCalenderUI = () => {
@@ -235,6 +161,8 @@ class CalendarBody extends Component {
                             <div className="info-wrap">
                                 {!!createVisible && (
                                     <span
+                                        data-for="tooltip"
+                                        data-tip="Create a task"
                                         key={keyGen()}
                                         className="plus-ico create-task-ico inline-flx"
                                         onClick={(e) =>
@@ -243,10 +171,6 @@ class CalendarBody extends Component {
                                                 createTaskTimestamp
                                             )
                                         }
-                                        onMouseEnter={(e) =>
-                                            this.onHoverOfCreateTask(e)
-                                        }
-                                        onMouseLeave={this.onHoverOutCommon}
                                     >
                                         <PlusLogo />
                                     </span>
@@ -258,44 +182,39 @@ class CalendarBody extends Component {
                                     <>
                                         {isHolidayCheck && (
                                             <span
+                                                data-for="holiday"
+                                                data-tip={isHolidayCheck}
                                                 key={keyGen()}
                                                 className="view-status-btn"
                                                 data-task-status="holiday"
-                                                onMouseEnter={(e) =>
-                                                    this.onHoverOfHoliday(
-                                                        e,
-                                                        isHolidayCheck
-                                                    )
-                                                }
-                                                onMouseLeave={
-                                                    this.onHoverOutCommon
-                                                }
                                             />
                                         )}
                                         {isAssign && (
                                             <span
-                                                className="view-status-btn"
-                                                data-task-status="assign"
-                                                onMouseEnter={(e) =>
-                                                    this.onHoverOfTasks(
-                                                        e,
-                                                        'assign',
-                                                        assignedTasks
+                                                data-for="tooltip"
+                                                data-tip="View assigned tasks"
+                                                onClick={() =>
+                                                    this.taskUtilsHandler(
+                                                        givenDateTimestamp,
+                                                        'assign'
                                                     )
                                                 }
+                                                className="view-status-btn"
+                                                data-task-status="assign"
                                             ></span>
                                         )}
                                         {isComplete && (
                                             <span
-                                                className="view-status-btn"
-                                                data-task-status="completed"
-                                                onMouseEnter={(e) =>
-                                                    this.onHoverOfTasks(
-                                                        e,
-                                                        'complete',
-                                                        completeTasks
+                                                data-for="tooltip"
+                                                data-tip="View completed tasks"
+                                                onClick={() =>
+                                                    this.taskUtilsHandler(
+                                                        givenDateTimestamp,
+                                                        'complete'
                                                     )
                                                 }
+                                                className="view-status-btn"
+                                                data-task-status="completed"
                                             ></span>
                                         )}
                                     </>
@@ -316,141 +235,27 @@ class CalendarBody extends Component {
         }
         return allRow;
     };
+    componentDidUpdate() {
+        ReactTooltip.rebuild();
+    }
 
-    renderTooltipBody = () => {
-        let renderArr = [],
-            tooltipData = this.context.AppData.calendarState.tooltip,
-            tooltipFor = tooltipData.tooltipFor,
-            holidayName =
-                tooltipData.utils && tooltipData.utils.hasOwnProperty('holiday')
-                    ? tooltipData.utils.holiday
-                    : '';
-        if (tooltipFor == 'holiday') {
-            if (holidayName) {
-                renderArr.push(
-                    <div key="holiday" className="comn-tooltip tt__holiday">
-                        <div className="task-tooltip-inner">
-                            <p className="tt-text tt__holiday-text">
-                                {holidayName}
-                            </p>
-                        </div>
-                    </div>
-                );
-            }
-        } else if (tooltipFor == 'create') {
-            renderArr.push(
-                <div key="create" className="comn-tooltip tt__create-task">
-                    <div className="task-tooltip-inner">
-                        <p className="tt-text tt__ct-text">Create a task</p>
-                    </div>
-                </div>
-            );
-        } else {
-            let tasks =
-                    tooltipData.utils &&
-                    tooltipData.utils.hasOwnProperty('tasks') &&
-                    tooltipData.utils.tasks.length > 0
-                        ? tooltipData.utils.tasks
-                        : [],
-                taskItem = [];
-            tasks.map((task) => {
-                let description = task.description,
-                    _date = new Date(Math.floor(task.timestamp)),
-                    hours = getHour(_date),
-                    mins = getMins(_date),
-                    format = getFormat(_date),
-                    timeStr = `${hours} : ${mins} ${format.toUpperCase()}`,
-                    _key = keyGen();
-                if (tooltipFor == 'assign') {
-                    taskItem.push(
-                        <div key={keyGen()} className="task__info">
-                            <div className="task__info-inner">
-                                <div className="task__status">
-                                    <input
-                                        type="checkbox"
-                                        name={_key}
-                                        id={_key}
-                                    />
-                                    <label htmlFor={_key}></label>
-                                </div>
-                                <div className="task__desc">
-                                    <h1 className="task__title">
-                                        {description}
-                                    </h1>
-                                    <p className="task__deadline">{timeStr}</p>
-                                </div>
-                                <div className="task__actions">
-                                    <a className="task__edit edit-task">
-                                        <EditIcon />
-                                    </a>
-                                    <a className="task__delete delete-task">
-                                        <DeleteIcon />
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                } else if (tooltipFor == 'completed') {
-                    taskItem.push(
-                        <div
-                            key={keyGen()}
-                            className="task__info task__completed"
-                        >
-                            <div className="task__info-inner">
-                                <div className="task__status">
-                                    <input
-                                        type="checkbox"
-                                        name={_key}
-                                        id={_key}
-                                    />
-                                    <label htmlFor={_key}></label>
-                                </div>
-                                <div className="task__desc">
-                                    <h1 className="task__title">
-                                        {description}
-                                    </h1>
-                                    <p className="task__deadline">{timeStr}</p>
-                                </div>
-                                <div className="task__actions">
-                                    <a className="task__delete delete-task">
-                                        <DeleteIcon />
-                                    </a>
-                                </div>
-                            </div>
-                        </div>
-                    );
-                } else {
-                    renderArr.push(<></>);
-                }
-            });
-            if (tasks && tasks.length > 0) {
-                renderArr.push(
-                    <div key={keyGen()} className="comn-tooltip tt__task-list">
-                        <div className="task-tooltip-inner">
-                            <div
-                                onClick={() => this.onHoverOutCommon()}
-                                className="closeTooltipBtn"
-                            >
-                                <CloseBtnIcon />
-                            </div>
-                            <div className="task-list-wrap">{taskItem}</div>
-                        </div>
-                    </div>
-                );
-            }
+    taskUtilsHandler = (timestamp, tooltipFor) => {
+        if (timestamp && tooltipFor) {
+            typeof this.context.contextReducer == 'function' &&
+                this.context.contextReducer({
+                    type: 'updateTaskWidget',
+                    ts: timestamp,
+                    tf: tooltipFor,
+                    makeVisible: 'tasks'
+                });
         }
-        return renderArr;
     };
 
     render() {
         let allRow = this.renderCalenderUI();
-        let tooltipBody = this.renderTooltipBody();
 
         return (
-            <div
-                className="app__action-three wrap__calendar-body"
-                onMouseLeave={this.onHoverOutCommon}
-            >
+            <div className="app__action-three wrap__calendar-body">
                 <table className="calender-viewport">
                     <thead key={keyGen()} className="calender__header">
                         <tr key="days" className="tabel__row">
@@ -481,38 +286,24 @@ class CalendarBody extends Component {
                         {allRow}
                     </tbody>
                 </table>
-                <div key="overlays" className="calender-overlay">
-                    {tooltipBody}
-                </div>
+                <ReactTooltip
+                    key={keyGen()}
+                    place="top"
+                    id="tooltip"
+                    type="dark"
+                    effect="solid"
+                />
+                <ReactTooltip
+                    key={keyGen()}
+                    place="top"
+                    id="holiday"
+                    class="holiday-tt"
+                    type="dark"
+                    effect="solid"
+                />
             </div>
         );
     }
 }
 
 export default CalendarBody;
-
-// {/* <span
-//     className="view-status-btn"
-//     data-task-status="completed"
-// />
-// <span
-//     className="view-status-btn"
-//     data-task-status="assign"
-// /> */}
-
-// return (
-//     <>
-//         <div className="comn-tooltip tt__create-task">
-//             <div className="task-tooltip-inner">
-//                 <p className="tt-text tt__ct-text">Create a task</p>
-//             </div>
-//         </div>
-//         <div className="comn-tooltip tt__holiday">
-//             <div className="task-tooltip-inner">
-//                 <p className="tt-text tt__holiday-text">
-//                     adadasdj adjas ja djasdj aawdadjaa adasd
-//                 </p>
-//             </div>
-//         </div>
-//     </>
-// );

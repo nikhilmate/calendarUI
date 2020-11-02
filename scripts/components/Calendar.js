@@ -4,6 +4,7 @@ import CalendarAction from './CalendarAction';
 import CalendarLoad from './CalendarLoad';
 import CalendarBody from './CalendarBody';
 import TaskUpdate from './TaskUpdate';
+import TaskListUtil from './TaskListUtil';
 
 const Calendar = (props) => (
     <section className="wrap__main-body">
@@ -13,6 +14,7 @@ const Calendar = (props) => (
                 <CalendarLoad />
                 <CalendarBody />
                 <TaskUpdate />
+                <TaskListUtil />
             </div>
         </div>
     </section>
