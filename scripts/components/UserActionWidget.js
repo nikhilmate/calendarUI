@@ -82,7 +82,8 @@ class UserActionWidget extends Component {
                                     user: {
                                         email: res.user.email
                                     },
-                                    tasks: res.tasks
+                                    tasks: res.tasks,
+                                    notes: res.notes
                                 });
                         } else if (!res.success && !!res.errors) {
                             this.setState({

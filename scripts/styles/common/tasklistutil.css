@@ -55,6 +55,7 @@
     margin: 12px 0 10px;
     display: flex;
     justify-content: space-between;
+    align-items: center;
 }
 .wrap__tab-link {
     font-family: 'Roboto', Arial, Helvetica, sans-serif;
@@ -112,6 +113,7 @@
     border-top: 2px solid #85a9cf;
     height: 218px;
     overflow: auto;
+    position: relative;
 }
 .wrap__task-item {
     position: relative;
@@ -257,6 +259,10 @@
 
 
 /* notes */
+.section__notes-details .wrap__task-list {
+    padding-top: 5px;
+    padding-bottom: 10px;
+}
 .wrap__not-found {
     padding-top: 50px;
 }
@@ -282,6 +288,10 @@
     border-radius: 4px;
     border: solid 0.8px rgba(211, 218, 226, 0.63);
     background-color: rgba(237, 241, 244, 0.42);
+    margin-left: 10px;
+}
+.noteBarSec {
+    margin-left: 0;
 }
 .wrap__task-date-picker .date__picker-arrow {
     right: 15px;
@@ -290,4 +300,132 @@
 .wrap__task-date-picker .date__picker-input {
     padding-top: 9px;
     padding-bottom: 8px;
+}
+
+.btn__create-task {
+    width: 40px;
+    height: 40px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 26px;
+    font-weight: 500;
+    border-radius: 50%;
+    background-color: #52a701;
+    color: #fff;
+    cursor: pointer;
+    transition: all .3s ease;
+    margin: 0 0 0 auto;
+}
+
+.btn__create-task:hover {
+    background-color: #448a02;
+}
+
+
+/* notes */
+.wrap__note-item {
+    padding: 10px 0;
+}
+.wrap__note-item:not(:last-child) {
+    border-bottom: 1px solid #cbd0d8;
+}
+.wrap__ni-inner {
+    display: flex;
+}
+
+.note-point{
+    display: inline-flex;
+    width: 16px;
+    height: 16px;
+    border-radius: 50%;
+    box-shadow: 0 0 2px 1px rgba(0, 0, 0, 0.1);
+    border: 2px solid #52a701;
+}
+
+.wrap__note-desc {
+    margin-left: 10px;
+    flex: 1 0 auto;
+}
+.heading__note-desc {
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    color: #777;
+}
+.btn__action-comn {
+    display: inline-flex;
+}
+
+.btn__action-comn svg {
+    display: block;
+}
+.btn__note-delete,
+.wrap__note-action {
+    margin-left: 15px;
+    display: inline-flex;
+    align-items: center;
+} 
+.input__note-desc {
+    width: 200px;
+    height: 36px;
+    border-radius: 4px;
+    border: solid 1px #acb2bb;
+    background-color: #FFF;
+    padding: 8px 15px;
+    font-family: 'Roboto',
+    Arial,
+    Helvetica,
+    sans-serif;
+    font-size: 16px;
+    font-weight: 400;
+    color: #0a2541;
+    transition: all 0.3s ease;
+}
+.input__note-desc:hover,
+.input__note-desc:focus {
+    border: solid 1px #333;
+}
+.btn__save {
+    height: 36px;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: 'Roboto', Arial, Helvetica, sans-serif;
+    font-size: 16px;
+    font-weight: 500;
+    border-radius: 4px;
+    background-color: #52a701;
+    color: #fff;
+    cursor: pointer;
+    padding: 8px 15px;
+    transition: all .3s ease;
+}
+.btn__save:hover {
+    background-color: #418502;
+}
+.createNote .wrap__ni-inner,
+.updateNote .wrap__ni-inner {
+    align-items: center;
+}
+
+.createNote .btn__note-delete,
+.editingNote .btn__note-delete {
+    margin-left: 15px;
+}
+
+.btn__action-comn:hover svg path {
+    fill: #666;
+}
+
+.noteChangeOverlay {
+    position: absolute;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    z-index: 1;
+    background-color: rgb(237, 241, 244);
+    padding: 10px 20px 0;
 }

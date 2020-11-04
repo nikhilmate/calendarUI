@@ -36,6 +36,7 @@ require('./config/passport')(passport);
 require('./routes/common_routes.js')(app);
 require('./routes/user_routes.js')(app, __dirname, passport);
 require('./routes/task_routes.js')(app, passport);
+require('./routes/note_routes.js')(app, passport);
 
 app.use(express.static(staticPath));
 

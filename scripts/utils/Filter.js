@@ -11,7 +11,14 @@ export const FilterTasks = (params) => {
                         taskDate.getMonth(),
                         taskDate.getDate()
                     ).getTime();
-                if (derivedTS == timestamp) return true;
+
+                let findDate = new Date(timestamp),
+                    findTS = new Date(
+                        findDate.getFullYear(),
+                        findDate.getMonth(),
+                        findDate.getDate()
+                    ).getTime();
+                if (derivedTS == findTS) return true;
                 else return false;
             } else return false;
         });
@@ -35,6 +42,35 @@ export const FilterTasks = (params) => {
             default:
                 return [];
         }
+    }
+    return [];
+};
+
+export const FilterNotes = (params) => {
+    let { notes, timestamp } = params;
+
+    if (timestamp && notes) {
+        let tempNotes = notes.filter((note) => {
+            let noteTS = note.timestamp ? Math.floor(note.timestamp) : null;
+            if (noteTS) {
+                let noteDate = new Date(noteTS),
+                    derivedTS = new Date(
+                        noteDate.getFullYear(),
+                        noteDate.getMonth(),
+                        noteDate.getDate()
+                    ).getTime();
+
+                let findDate = new Date(timestamp),
+                    findTS = new Date(
+                        findDate.getFullYear(),
+                        findDate.getMonth(),
+                        findDate.getDate()
+                    ).getTime();
+                if (derivedTS == findTS) return true;
+                else return false;
+            } else return false;
+        });
+        return tempNotes;
     }
     return [];
 };

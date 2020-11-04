@@ -9,7 +9,11 @@ const URL = {
     createTask: '/api/task/create',
     updateTask: '/api/task/update',
     deleteTask: '/api/task/delete',
-    getTaskDetails: '/api/task/all'
+    getTaskDetails: '/api/task/all',
+    getNoteDetails: '/api/note/all',
+    createNote: '/api/note/create',
+    updateNote: '/api/note/update',
+    deleteNote: '/api/note/delete'
 };
 
 export const signIn = (payload) => {
@@ -146,6 +150,77 @@ export const getTaskDetails = () => {
     );
     var promise = new Promise(function (resolve, reject) {
         Xhr(URL.getTaskDetails, config)
+            .then((res) => {
+                resolve(res);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+    return promise;
+};
+
+export const getNoteDetails = () => {
+    const config = Object.assign(
+        {},
+        {
+            method: 'GET'
+        }
+    );
+    var promise = new Promise(function (resolve, reject) {
+        Xhr(URL.getNoteDetails, config)
+            .then((res) => {
+                resolve(res);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+    return promise;
+};
+
+export const createNote = (payload) => {
+    const config = Object.assign({}, payload, {
+        method: 'POST'
+    });
+    var promise = new Promise(function (resolve, reject) {
+        Xhr(URL.createNote, config)
+            .then((res) => {
+                resolve(res);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+    return promise;
+};
+
+export const updateNote = (payload) => {
+    const config = Object.assign({}, payload, {
+        method: 'POST'
+    });
+    var promise = new Promise(function (resolve, reject) {
+        Xhr(URL.updateNote, config)
+            .then((res) => {
+                resolve(res);
+            })
+            .catch((err) => {
+                console.log(err);
+                reject(err);
+            });
+    });
+    return promise;
+};
+
+export const deleteNote = (payload) => {
+    const config = Object.assign({}, payload, {
+        method: 'POST'
+    });
+    var promise = new Promise(function (resolve, reject) {
+        Xhr(URL.deleteNote, config)
             .then((res) => {
                 resolve(res);
             })

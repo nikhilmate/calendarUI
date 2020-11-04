@@ -60,9 +60,14 @@ class TaskUpdate extends Component {
 
     cancelCreateTaskHandler = () => {
         typeof this.context.contextReducer == 'function' &&
-            this.context.contextReducer({
-                type: 'resetTaskUpdate'
-            });
+            this.context.contextReducer([
+                {
+                    type: 'resetTaskUpdate'
+                },
+                {
+                    type: 'resetTaskWidget'
+                }
+            ]);
     };
 
     descriptionChangeHandler = (e) => {

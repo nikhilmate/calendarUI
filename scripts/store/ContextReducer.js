@@ -2,11 +2,14 @@ const ACTION = {
     signIn: 'signIn',
     signOut: 'signOut',
     updateTaskList: 'updateTaskList',
+    updateNotes: 'updateNotes',
     createTaskUpdate: 'createTaskUpdate',
     resetTaskUpdate: 'resetTaskUpdate',
     changeCalendarView: 'changeCalendarView',
     updateTaskWidget: 'updateTaskWidget',
-    resetTaskWidget: 'resetTaskWidget'
+    resetTaskWidget: 'resetTaskWidget',
+    updateNoteState: 'updateNoteState',
+    resetNoteState: 'resetNoteState'
 };
 
 const initialState = {
@@ -16,6 +19,9 @@ const initialState = {
     isLogged: false,
     taskManager: {
         tasks: []
+    },
+    noteManager: {
+        notes: []
     },
     curfToken: null,
     taskState: {
@@ -35,6 +41,13 @@ const initialState = {
             tf: null,
             makeVisible: false
         }
+    },
+    noteState: {
+        triggerType: null, //create/update
+        timestamp: null,
+        noteDesc: null,
+        id: null,
+        error: null
     },
     calendarState: {
         currentView: {
@@ -66,13 +79,17 @@ const setStateInContext = (state, payload) => {
         switch (payload.type) {
             case ACTION.signIn:
                 let { user } = payload,
-                    _tasks = payload.tasks;
+                    _tasks = payload.tasks,
+                    _notes = payload.notes;
                 return Object.assign({}, state, {
                     userDetails: Object.assign({}, state.userDetails, {
                         email: user.email
                     }),
                     taskManager: Object.assign({}, state.taskManager, {
                         tasks: _tasks
+                    }),
+                    noteManager: Object.assign({}, state.noteManager, {
+                        notes: _notes
                     }),
                     isLogged: true
                 });
@@ -173,6 +190,49 @@ const setStateInContext = (state, payload) => {
                 return Object.assign({}, state, {
                     taskState: Object.assign({}, state.taskState, {
                         taskWidget: { ts: null, tf: null, makeVisible: false }
+                    })
+                });
+
+            case ACTION.updateNotes:
+                let { notes } = payload;
+                return Object.assign({}, state, {
+                    noteManager: { notes }
+                });
+
+            case ACTION.updateNoteState:
+                let timestamp2 = payload.hasOwnProperty('timestamp')
+                        ? payload.timestamp
+                        : state.noteState.timestamp,
+                    triggerType2 = payload.hasOwnProperty('triggerType')
+                        ? payload.triggerType
+                        : state.noteState.triggerType,
+                    noteDesc = payload.hasOwnProperty('noteDesc')
+                        ? payload.noteDesc
+                        : state.noteState.noteDesc,
+                    id2 = payload.hasOwnProperty('id')
+                        ? payload.id
+                        : state.noteState.id,
+                    error2 = payload.hasOwnProperty('error')
+                        ? payload.error
+                        : state.noteState.error;
+                return Object.assign({}, state, {
+                    noteState: Object.assign({}, state.noteState, {
+                        timestamp: timestamp2,
+                        triggerType: triggerType2,
+                        noteDesc,
+                        id: id2,
+                        error: error2
+                    })
+                });
+
+            case ACTION.resetNoteState:
+                return Object.assign({}, state, {
+                    noteState: Object.assign({}, state.noteState, {
+                        timestamp: null,
+                        triggerType: null,
+                        noteDesc: null,
+                        id: null,
+                        error: null
                     })
                 });
 

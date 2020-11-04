@@ -6,16 +6,16 @@ import {
     CloseBtnIcon,
     DeleteIcon,
     EditIcon,
-    NotesIcon,
     TaskListIcon,
     DatePickerIcon,
     DownArrow
 } from '../utils/Icons';
-import { getMins, getHour, getFormat, keyGen } from '../utils/Util';
+import { getMins, getHour, getFormat } from '../utils/Util';
 import DatePickerComp from 'react-datepicker';
-import CustomDateInput from './CustomDateInput';
 import { FilterTasks } from '../utils/Filter';
 import { deleteTask, getTaskDetails, updateTask } from '../utils/ApiActions';
+import NoteWidget from './NoteWidget';
+import CustomDateInput from './CustomDateInput';
 
 class TaskListUtil extends Component {
     constructor(props) {
@@ -36,16 +36,14 @@ class TaskListUtil extends Component {
             mins = getMins(_date),
             format = getFormat(_date),
             timeStr = `${hours} : ${mins} ${format.toUpperCase()}`,
-            _key = keyGen(),
+            _key = task.timestamp,
             isComplete = JSON.parse(task.isFinished) ? true : false;
 
         return (
             <div
-                key={keyGen()}
+                key={`item${_key}`}
                 className={
-                    isComplete
-                        ? 'wrap__task-item task__completed'
-                        : 'wrap__task-item'
+                    'wrap__task-item ' + (isComplete ? 'task__completed' : '')
                 }
             >
                 <div className="wrap__task-item-inner">
@@ -92,8 +90,11 @@ class TaskListUtil extends Component {
 
     generateTaskUI = () => {
         let parsedData = this.context.AppData.taskState.taskWidget,
-            ts = parsedData ? parsedData.ts : new Date().getTime(),
-            tf = parsedData ? parsedData.tf : 'assign',
+            ts =
+                parsedData && parsedData.ts
+                    ? parsedData.ts
+                    : new Date().getTime(),
+            tf = parsedData && parsedData.tf ? parsedData.tf : 'assign',
             tooltipContent = [];
 
         let assignedTasks = this.filterTasks(ts, 'assign'),
@@ -105,7 +106,7 @@ class TaskListUtil extends Component {
                 assignedTasks.map((task) => {
                     let tempTasks = this.taskListItem(task);
                     tooltipContent.push(
-                        <React.Fragment key={keyGen()}>
+                        <React.Fragment key={`item${task.timestamp}`}>
                             {tempTasks}
                         </React.Fragment>
                     );
@@ -115,7 +116,7 @@ class TaskListUtil extends Component {
                 finishedTasks.map((task) => {
                     let tempTasks = this.taskListItem(task);
                     tooltipContent.push(
-                        <React.Fragment key={keyGen()}>
+                        <React.Fragment key={`item${task.timestamp}`}>
                             {tempTasks}
                         </React.Fragment>
                     );
@@ -125,7 +126,7 @@ class TaskListUtil extends Component {
                 allTasks.map((task) => {
                     let tempTasks = this.taskListItem(task);
                     tooltipContent.push(
-                        <React.Fragment key={keyGen()}>
+                        <React.Fragment key={`item${task.timestamp}`}>
                             {tempTasks}
                         </React.Fragment>
                     );
@@ -146,12 +147,13 @@ class TaskListUtil extends Component {
             });
     };
 
-    tabsCategHandler = (categ) => {
+    tabsCategHandler = (tf, categ) => {
         if (['tasks', 'notes'].indexOf(categ) !== -1) {
             typeof this.context.contextReducer == 'function' &&
                 this.context.contextReducer({
                     type: 'updateTaskWidget',
-                    makeVisible: categ
+                    makeVisible: categ,
+                    tf
                 });
         }
     };
@@ -296,24 +298,67 @@ class TaskListUtil extends Component {
         }
     };
 
+    createTaskHandler = (timestamp, type) => {
+        switch (type) {
+            case 'tasks':
+                let now = new Date(timestamp),
+                    min = getMins(now),
+                    hour = getHour(now),
+                    format = getFormat(now),
+                    date = now;
+                typeof this.context.contextReducer == 'function' &&
+                    this.context.contextReducer([
+                        {
+                            type: 'createTaskUpdate',
+                            triggerType: 'create',
+                            timestamp,
+                            min,
+                            hour,
+                            format,
+                            date
+                        },
+                        {
+                            type: 'resetTaskWidget'
+                        }
+                    ]);
+                break;
+
+            case 'notes':
+                typeof this.context.contextReducer == 'function' &&
+                    this.context.contextReducer({
+                        type: 'updateNoteState',
+                        triggerType: 'create',
+                        timestamp
+                    });
+                break;
+            default:
+                break;
+        }
+    };
+
     render() {
         let { ts, tf, makeVisible } = this.context.AppData.taskState.taskWidget,
             tempVisible = !makeVisible ? 'tasks' : makeVisible;
-
         let taskListFor = tf ? tf : 'assign',
             tempTf = this.taskStatus.filter((status) => {
                 return status.toLowerCase().includes(taskListFor.toLowerCase());
             }),
             tempStatusOption =
                 tempTf && tempTf.length > 0 ? tempTf[0] : 'Assign';
-
         let tempNow = new Date(),
             now = tempNow.getTime(),
             tempDate = ts ? Math.floor(ts) : now;
+        let tempTasks = this.filterTasks(tempDate, taskListFor),
+            taskList = this.generateTaskUI();
 
-        let tempTasks = this.filterTasks(tempDate, taskListFor);
+        let isTaskBar = tempVisible === 'tasks',
+            isNoteBar = tempVisible === 'notes';
 
-        let taskList = this.generateTaskUI();
+        let actionNote = this.context.AppData.noteState,
+            { timestamp, triggerType } = actionNote,
+            createNoteFlag =
+                timestamp && triggerType && isNoteBar ? 'btnDisabled' : '';
+
         return (
             <div
                 className="calender-action-4 taskListUtil"
@@ -330,65 +375,94 @@ class TaskListUtil extends Component {
                     </div>
                     <div className="wrap__tabs-categ">
                         <div
-                            onClick={() => this.tabsCategHandler('tasks')}
+                            onClick={() =>
+                                this.tabsCategHandler(taskListFor, 'tasks')
+                            }
                             className={
                                 'wrap__tab-link ' +
-                                (tempVisible === 'tasks' && 'tabActive')
+                                (isTaskBar ? 'tabActive' : '')
                             }
                         >
                             Tasks
                         </div>
                         <div
-                            onClick={() => this.tabsCategHandler('notes')}
+                            onClick={() =>
+                                this.tabsCategHandler(taskListFor, 'notes')
+                            }
                             className={
                                 'wrap__tab-link ' +
-                                (tempVisible === 'notes' && 'tabActive')
+                                (isNoteBar ? 'tabActive' : '')
                             }
                         >
                             Notes
                         </div>
                     </div>
+                    <div className="wrap__action-bar">
+                        <div className="wrap__task-status">
+                            {isTaskBar && (
+                                <div className="wrap__select-task-status">
+                                    <Select
+                                        className="select__task-status"
+                                        name="select__task-status"
+                                        id="select__task-status"
+                                        options={this.taskStatus}
+                                        defaultOption={tempStatusOption}
+                                        onChangeHandler={(e) =>
+                                            this.taskStatusHandler(e)
+                                        }
+                                    />
+                                </div>
+                            )}
+                            <div
+                                className={
+                                    'wrap__task-date-picker' +
+                                    (isNoteBar ? ' noteBarSec' : '')
+                                }
+                            >
+                                <span className="date__picker-ico inline-flx">
+                                    <DatePickerIcon />
+                                </span>
+                                <DatePickerComp
+                                    selected={tempDate}
+                                    onChange={(date) =>
+                                        this.datePickerHandler(date)
+                                    }
+                                    showMonthDropdown
+                                    showYearDropdown
+                                    dropdownMode="select"
+                                    customInput={<CustomDateInput />}
+                                />
+                                <span className="date__picker-arrow inline-flx">
+                                    <DownArrow />
+                                </span>
+                            </div>
+                            <button
+                                onClick={() =>
+                                    this.createTaskHandler(
+                                        tempDate,
+                                        tempVisible
+                                    )
+                                }
+                                title={
+                                    isTaskBar
+                                        ? 'Create a Task'
+                                        : 'Create a Note'
+                                }
+                                className={'btn__create-task ' + createNoteFlag}
+                            >
+                                +
+                            </button>
+                        </div>
+                    </div>
                     <div className="wrap__tabs-content">
                         <div
-                            key={keyGen()}
+                            key={'task-detail'}
                             className={
                                 'section__task-details wrap__comn-detail ' +
                                 (tempVisible == 'tasks' && 'tabActive')
                             }
                         >
                             <div className="wrap__tmp1">
-                                <div className="wrap__task-status">
-                                    <div className="wrap__select-task-status">
-                                        <Select
-                                            className="select__task-status"
-                                            name="select__task-status"
-                                            id="select__task-status"
-                                            options={this.taskStatus}
-                                            defaultOption={tempStatusOption}
-                                            onChangeHandler={(e) =>
-                                                this.taskStatusHandler(e)
-                                            }
-                                        />
-                                    </div>
-                                    <div className="wrap__task-date-picker">
-                                        <span className="date__picker-ico inline-flx">
-                                            <DatePickerIcon />
-                                        </span>
-                                        <DatePickerComp
-                                            selected={tempDate}
-                                            onChange={(date) =>
-                                                this.datePickerHandler(date)
-                                            }
-                                            showMonthDropdown
-                                            showYearDropdown
-                                            dropdownMode="select"
-                                            customInput={<CustomDateInput />}
-                                        />
-                                        <span className="date__picker-arrow inline-flx">
-                                            <DownArrow />
-                                        </span>
-                                    </div>
-                                </div>
                                 {tempTasks && tempTasks.length > 0 ? (
                                     <div className="wrap__task-list">
                                         {taskList}
@@ -406,18 +480,13 @@ class TaskListUtil extends Component {
                             </div>
                         </div>
                         <div
-                            key={keyGen()}
+                            key={'note-detail'}
                             className={
                                 'section__notes-details wrap__comn-detail ' +
-                                (tempVisible == 'notes' && 'tabActive')
+                                (tempVisible == 'notes' ? 'tabActive' : '')
                             }
                         >
-                            <div className="wrap__not-found">
-                                <div className="wrap__nf-icon">
-                                    <NotesIcon />
-                                </div>
-                                <h1 className="wrap__nf-desc">Not Found.</h1>
-                            </div>
+                            <NoteWidget />
                         </div>
                     </div>
                 </div>
