@@ -91,5 +91,35 @@ module.exports = {
                 type: Sequelize.DATE
             }
         };
+    },
+    CreateNoteObj(Sequelize) {
+        return {
+            id: {
+                type: Sequelize.UUID,
+                defaultValue: Sequelize.UUIDV4,
+                allowNull: false,
+                primaryKey: true
+            },
+            note: {
+                type: Sequelize.TEXT,
+                allowNull: false
+            },
+            timestamp: {
+                type: Sequelize.STRING,
+                allowNull: false
+            },
+            user_email: {
+                type: Sequelize.STRING,
+                allowNull: false
+            },
+            createdAt: {
+                allowNull: false,
+                type: Sequelize.DATE
+            },
+            updatedAt: {
+                allowNull: false,
+                type: Sequelize.DATE
+            }
+        };
     }
 };

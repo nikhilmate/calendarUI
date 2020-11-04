@@ -19,6 +19,13 @@ module.exports = (sequelize, DataTypes) => {
                 onUpdate: 'CASCADE',
                 onDelete: 'NO ACTION'
             });
+            User.hasMany(models.Note, {
+                as: 'notes',
+                sourceKey: 'email',
+                foreignKey: 'user_email',
+                onUpdate: 'CASCADE',
+                onDelete: 'NO ACTION'
+            });
         }
     }
     User.init(CreateUserObj(DataTypes), {

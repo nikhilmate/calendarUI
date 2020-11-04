@@ -117,6 +117,26 @@ class CalendarLoad extends Component {
                                 US Public Holidays
                             </span>
                         </div>
+                        <div className="blk__task-label align-flx">
+                            <span className="blk__label-ico inline-flx">
+                                <svg
+                                    className="dl-blk"
+                                    xmlns="http://www.w3.org/2000/svg"
+                                    width={16}
+                                    height={16}
+                                    viewBox="0 0 16 16"
+                                >
+                                    <g fill="#EC7D06" fillRule="evenodd">
+                                        <path
+                                            fillRule="nonzero"
+                                            d="M14 2h-.667V.667c0-.368-.298-.667-.666-.667H12c-.368 0-.667.299-.667.667V2H4.667V.667C4.667.299 4.368 0 4 0h-.667c-.368 0-.666.299-.666.667V2H2C.897 2 0 2.897 0 4v10c0 1.103.897 2 2 2h12c1.103 0 2-.897 2-2V4c0-1.103-.897-2-2-2zm0 12.667H2c-.368 0-.667-.299-.667-.667V6.027h13.334V14c0 .368-.299.667-.667.667z"
+                                        />
+                                        <path d="M4.8 8.4H11.2V12.4H4.8z" />
+                                    </g>
+                                </svg>
+                            </span>
+                            <span className="blk__label-text ml-10">Notes</span>
+                        </div>
                     </div>
                     <div className="wrap__calendar-change">
                         <a

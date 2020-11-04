@@ -8,11 +8,10 @@ import {
     isHoliday,
     getMins,
     getHour,
-    getFormat,
-    keyGen
+    getFormat
 } from '../utils/Util';
 import AppContext from '../store/AppContext';
-import { FilterTasks } from '../utils/Filter';
+import { FilterNotes, FilterTasks } from '../utils/Filter';
 
 class CalendarBody extends Component {
     constructor(props) {
@@ -41,6 +40,11 @@ class CalendarBody extends Component {
     filterTasks = (timestamp, type) => {
         let tasks = this.context.AppData.taskManager.tasks;
         return FilterTasks({ tasks, timestamp, type });
+    };
+
+    filterNotes = (timestamp) => {
+        let notes = this.context.AppData.noteManager.notes;
+        return FilterNotes({ notes, timestamp });
     };
 
     renderCalenderUI = () => {
@@ -73,7 +77,7 @@ class CalendarBody extends Component {
                             title={getTitleDate(
                                 new Date(prev_year, prev_month, tempDate)
                             )}
-                            key={keyGen()}
+                            key={`td${prev_year}${prev_month}${tempDate}`}
                             className="comn__cell static_cell"
                         >
                             <div className="info-wrap">
@@ -88,7 +92,7 @@ class CalendarBody extends Component {
                             title={getTitleDate(
                                 new Date(year, month, date + newMonth - 1)
                             )}
-                            key={keyGen()}
+                            key={`td${date + newMonth - 1}${month}${year}`}
                             className="comn__cell static_cell"
                         >
                             <div className="info-wrap">
@@ -151,10 +155,18 @@ class CalendarBody extends Component {
                             finishedTasks && finishedTasks.length > 0
                                 ? true
                                 : false;
+
+                    // note utils
+                    let dateNotes = context_isLogged
+                            ? this.filterNotes(givenDateTimestamp)
+                            : null,
+                        checkNotes =
+                            dateNotes && dateNotes.length > 0 ? true : false;
+
                     allCol.push(
                         <td
                             title={getTitleDate(new Date(year, month, date))}
-                            key={keyGen()}
+                            key={`td${date}${month}${year}`}
                             className="comn__cell month_date"
                             data-future-day={isCurrentDate}
                         >
@@ -163,7 +175,7 @@ class CalendarBody extends Component {
                                     <span
                                         data-for="tooltip"
                                         data-tip="Create a task"
-                                        key={keyGen()}
+                                        key={`${year}${month}${date}`}
                                         className="plus-ico create-task-ico inline-flx"
                                         onClick={(e) =>
                                             this.createTaskHandler(
@@ -177,14 +189,17 @@ class CalendarBody extends Component {
                                 )}
                                 <span className="date__text">{date}</span>
                             </div>
-                            {(isHolidayCheck || isAssign || isComplete) && (
+                            {(isHolidayCheck ||
+                                isAssign ||
+                                isComplete ||
+                                checkNotes) && (
                                 <div className="task__status-wrap">
                                     <>
                                         {isHolidayCheck && (
                                             <span
                                                 data-for="holiday"
                                                 data-tip={isHolidayCheck}
-                                                key={keyGen()}
+                                                key={isHolidayCheck}
                                                 className="view-status-btn"
                                                 data-task-status="holiday"
                                             />
@@ -217,6 +232,19 @@ class CalendarBody extends Component {
                                                 data-task-status="completed"
                                             ></span>
                                         )}
+                                        {checkNotes && (
+                                            <span
+                                                data-for="tooltip"
+                                                data-tip="View Notes"
+                                                onClick={() =>
+                                                    this.noteUtilsHandler(
+                                                        givenDateTimestamp
+                                                    )
+                                                }
+                                                className="view-status-btn"
+                                                data-notes-status="notes"
+                                            ></span>
+                                        )}
                                     </>
                                 </div>
                             )}
@@ -227,7 +255,7 @@ class CalendarBody extends Component {
                 colIndex++;
             }
             allRow.push(
-                <tr key={keyGen()} className="tabel__row">
+                <tr key={`tr${i}`} className="tabel__row">
                     {allCol}
                 </tr>
             );
@@ -251,13 +279,24 @@ class CalendarBody extends Component {
         }
     };
 
+    noteUtilsHandler = (timestamp) => {
+        if (timestamp) {
+            typeof this.context.contextReducer == 'function' &&
+                this.context.contextReducer({
+                    type: 'updateTaskWidget',
+                    ts: timestamp,
+                    makeVisible: 'notes'
+                });
+        }
+    };
+
     render() {
         let allRow = this.renderCalenderUI();
 
         return (
             <div className="app__action-three wrap__calendar-body">
                 <table className="calender-viewport">
-                    <thead key={keyGen()} className="calender__header">
+                    <thead key={'calenderHead'} className="calender__header">
                         <tr key="days" className="tabel__row">
                             <th key="sun" className="weekday comn__cell">
                                 Sun
@@ -287,14 +326,14 @@ class CalendarBody extends Component {
                     </tbody>
                 </table>
                 <ReactTooltip
-                    key={keyGen()}
+                    key={'tooltip'}
                     place="top"
                     id="tooltip"
                     type="dark"
                     effect="solid"
                 />
                 <ReactTooltip
-                    key={keyGen()}
+                    key={'holiday'}
                     place="top"
                     id="holiday"
                     class="holiday-tt"

@@ -59,12 +59,14 @@ module.exports = {
     async isLogged(req, res) {
         try {
             let userDetails = Object.assign({}, req.user.get()),
-                tasks = await req.user.getTasks();
+                tasks = await req.user.getTasks(),
+                notes = await req.user.getNotes();
             userDetails = Object.assign({}, deletePrivateDetails(userDetails));
             return res.status(200).json({
                 success: true,
                 user: userDetails,
-                tasks
+                tasks,
+                notes
             });
         } catch (error) {
             return res.status(401).json({
@@ -202,7 +204,7 @@ module.exports = {
 
     async login(req, res) {
         try {
-            let { tasks, user } = req.body;
+            let { tasks, notes, user } = req.body;
             let userDetails = Object.assign({}, user);
             userDetails = Object.assign({}, deletePrivateDetails(userDetails));
             let token = jwt.sign({ email: user.email }, PRIV_KEY, {
@@ -218,6 +220,7 @@ module.exports = {
                 success: true,
                 user: userDetails,
                 tasks: tasks ? tasks : [],
+                notes: notes ? notes : [],
                 token: 'Bearer ' + token
             });
         } catch (e) {

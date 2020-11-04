@@ -32,13 +32,15 @@ module.exports = {
                     } else {
                         let _user = Object.assign({}, userInstance.get());
                         _tasks = await userInstance.getTasks();
+                        _notes = await userInstance.getNotes();
                         delete _user['password'];
                         delete _user['id'];
                         req.body = Object.assign(
                             {},
                             {
                                 user: _user,
-                                tasks: _tasks
+                                tasks: _tasks,
+                                notes: _notes
                             }
                         );
                         return next();

@@ -12,6 +12,9 @@ const initState = {
     taskManager: {
         tasks: []
     },
+    noteManager: {
+        notes: []
+    },
     curfToken: null,
     taskState: {
         createTaskDetails: {
@@ -30,6 +33,13 @@ const initState = {
             tf: null,
             makeVisible: false
         }
+    },
+    noteState: {
+        timestamp: null,
+        triggerType: 'create', //create/update
+        noteDesc: null,
+        id: null,
+        error: null
     },
     calendarState: {
         currentView: {
@@ -75,6 +85,9 @@ class AppProvider extends Component {
                                 taskManager: {
                                     tasks: res.tasks
                                 },
+                                noteManager: {
+                                    notes: res.notes
+                                },
                                 isLogged: true
                             }));
                         } else if (!res.success && !!res.errors) {
@@ -85,6 +98,9 @@ class AppProvider extends Component {
                                 },
                                 taskManager: {
                                     tasks: []
+                                },
+                                noteManager: {
+                                    notes: []
                                 },
                                 isLogged: false
                             }));
@@ -100,6 +116,9 @@ class AppProvider extends Component {
                         },
                         taskManager: {
                             tasks: []
+                        },
+                        noteManager: {
+                            notes: []
                         },
                         isLogged: false
                     }));

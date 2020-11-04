@@ -138,3 +138,8 @@ nav {
 .mb-15 {
     margin-bottom: 15px;
 }
+
+.btnDisabled {
+    pointer-events: none;
+    opacity: 0.6;
+}
