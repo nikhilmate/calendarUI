@@ -1,5 +1,5 @@
 'use strict';
-const { Model, Op, Sequelize } = require('sequelize');
+const { Model } = require('sequelize');
 const { v4: uuidV4 } = require('uuid');
 const CreateUserObj = require('../utils').CreateUserObj;
 

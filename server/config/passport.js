@@ -1,5 +1,4 @@
 const Strategy = require('passport-jwt').Strategy;
-const ExtractJwt = require('passport-jwt').ExtractJwt;
 
 const fs = require('fs');
 const path = require('path');

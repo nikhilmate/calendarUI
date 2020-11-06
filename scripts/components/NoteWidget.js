@@ -1,6 +1,7 @@
 import React, { Component } from 'react';
 
 import AppContext from '../store/AppContext';
+import { FilterNotes } from '../utils/Filter';
 
 import { NotesIcon } from '../utils/Icons';
 import NoteItem from './NoteItem';
@@ -14,31 +15,7 @@ class NoteWidget extends Component {
     static contextType = AppContext;
 
     filterNotes = (notes, timestamp) => {
-        let notesArr = [];
-        if (timestamp) {
-            notesArr = notes.filter((note) => {
-                let noteTS = note.timestamp ? Math.floor(note.timestamp) : null;
-                if (noteTS) {
-                    let noteDate = new Date(noteTS),
-                        derivedTS = new Date(
-                            noteDate.getFullYear(),
-                            noteDate.getMonth(),
-                            noteDate.getDate()
-                        ).getTime();
-
-                    let findDate = new Date(timestamp),
-                        findTS = new Date(
-                            findDate.getFullYear(),
-                            findDate.getMonth(),
-                            findDate.getDate()
-                        ).getTime();
-                    if (derivedTS == findTS) return true;
-                    else return false;
-                } else return false;
-            });
-            return notesArr;
-        }
-        return [];
+        return FilterNotes({ notes, timestamp });
     };
 
     render() {
