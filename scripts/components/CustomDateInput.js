@@ -1,6 +1,6 @@
 import React, { forwardRef } from 'react';
 
-const CustomDateInput = (props) => (
+const CustomDateInput = (props, ref) => (
     <input
         autoComplete="off"
         type="text"

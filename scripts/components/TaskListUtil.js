@@ -41,7 +41,7 @@ class TaskListUtil extends Component {
 
         return (
             <div
-                key={`item${_key}`}
+                key={`item${task.id}`}
                 className={
                     'wrap__task-item ' + (isComplete ? 'task__completed' : '')
                 }
@@ -106,7 +106,7 @@ class TaskListUtil extends Component {
                 assignedTasks.map((task) => {
                     let tempTasks = this.taskListItem(task);
                     tooltipContent.push(
-                        <React.Fragment key={`item${task.timestamp}`}>
+                        <React.Fragment key={`item${task.id}`}>
                             {tempTasks}
                         </React.Fragment>
                     );
@@ -116,7 +116,7 @@ class TaskListUtil extends Component {
                 finishedTasks.map((task) => {
                     let tempTasks = this.taskListItem(task);
                     tooltipContent.push(
-                        <React.Fragment key={`item${task.timestamp}`}>
+                        <React.Fragment key={`item${task.id}`}>
                             {tempTasks}
                         </React.Fragment>
                     );
@@ -126,7 +126,7 @@ class TaskListUtil extends Component {
                 allTasks.map((task) => {
                     let tempTasks = this.taskListItem(task);
                     tooltipContent.push(
-                        <React.Fragment key={`item${task.timestamp}`}>
+                        <React.Fragment key={`item${task.id}`}>
                             {tempTasks}
                         </React.Fragment>
                     );
