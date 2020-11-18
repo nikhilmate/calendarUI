@@ -1,14 +1,23 @@
 {
-  "development": {
-    "dialect": "sqlite",
-    "storage": "./database/database.sqlite3"
-  },
-  "test": {
-    "dialect": "sqlite",
-    "storage": ":memory"
-  },
-  "production": {
-    "dialect": "sqlite",
-    "storage": "./database/database.sqlite3"
-  }
+	"development": {
+        "host": "127.0.0.1",
+        "username": "root",
+        "password": null,
+        "database": "calendardb_dev",
+        "dialect": "mysql"
+	},
+	"test": {
+        "host": "127.0.0.1",
+        "username": "root",
+        "password": null,
+        "database": "calendardb",
+        "dialect": "mysql"
+	},
+	"production": {
+        "host": "127.0.0.1",
+        "username": "root",
+        "password": null,
+        "database": "calendardb",
+        "dialect": "mysql"
+	}
 }
