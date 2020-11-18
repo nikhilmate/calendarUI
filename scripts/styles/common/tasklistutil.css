@@ -289,6 +289,7 @@
     border: solid 0.8px rgba(211, 218, 226, 0.63);
     background-color: rgba(237, 241, 244, 0.42);
     margin-left: 10px;
+    z-index: 2;
 }
 .noteBarSec {
     margin-left: 0;

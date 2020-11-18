@@ -9,7 +9,6 @@ class UpdateNote extends Component {
         super(props);
         let actionNote = this.props.actionNote;
         this.state = {
-            timestamp: actionNote.timestamp,
             triggerType: actionNote.triggerType,
             id: actionNote.id,
             noteDesc: actionNote.noteDesc
@@ -33,7 +32,8 @@ class UpdateNote extends Component {
 
     finalNoteHandler = (triggerType, id) => {
         let noteDesc = this.state.noteDesc,
-            timestamp = this.state.timestamp,
+            { ts } = this.context.AppData.taskState.taskWidget,
+            timestamp = ts ? Math.floor(ts) : new Date().getTime(),
             token = this.context.AppData.curfToken;
         switch (triggerType) {
             case 'create':
@@ -157,7 +157,9 @@ class UpdateNote extends Component {
 
     render() {
         let createTrigger = this.state.triggerType === 'create',
-            { noteDesc, triggerType, id, timestamp } = this.state;
+            { ts } = this.context.AppData.taskState.taskWidget,
+            timestamp = ts ? Math.floor(ts) : new Date().getTime(),
+            { noteDesc, triggerType, id } = this.state;
 
         return (
             <div className="noteChangeOverlay">

@@ -36,6 +36,8 @@
 
 .wrap__task-btn {
     margin-left: 10px;
+    display: inline-flex;
+    align-items: center;
 }
 
 .create-task--btn {
@@ -50,4 +52,11 @@
 
 .create-task--btn:hover {
     background-color: #499501;
+}
+.create-note--btn {
+    background-color: #ff8400;
+    margin-right: 20px;
+}
+.create-note--btn:hover {
+    background-color: #e67a08;
 }

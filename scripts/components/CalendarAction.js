@@ -63,6 +63,24 @@ class CalendarAction extends Component {
             });
     };
 
+    createNoteHandler = () => {
+        let now = new Date(),
+            timestamp = now.getTime();
+        typeof this.context.contextReducer == 'function' &&
+            this.context.contextReducer([
+                {
+                    type: 'updateTaskWidget',
+                    ts: timestamp,
+                    makeVisible: 'notes'
+                },
+                {
+                    type: 'updateNoteState',
+                    triggerType: 'create',
+                    timestamp
+                }
+            ]);
+    };
+
     render() {
         let tempNow = new Date(),
             context_month = this.context.AppData.calendarState.currentView
@@ -99,6 +117,13 @@ class CalendarAction extends Component {
                         </div>
                     </div>
                     <div className="wrap__task-btn">
+                        <button
+                            id="create-note--btn"
+                            className="create-task--btn create-note--btn comn__btn"
+                            onClick={this.createNoteHandler}
+                        >
+                            Create a note
+                        </button>
                         <button
                             id="create-task--btn"
                             className="create-task--btn comn__btn"
