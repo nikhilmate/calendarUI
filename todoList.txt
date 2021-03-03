@@ -1,0 +1,26 @@
+1. Create Sign in, sign up & sign out => {
+    dropdown : 'small dropdown'
+    idea : 'keep me logged'
+    signout : 'if possible implement from backend'
+}
+--- done
+2. Calendar dates has tasks, holidays => {
+    idea: {
+        + icon : 'has multiple options like add tasks, events, notes,
+        holiday: 'instead of holiday it will show both events and holiday data
+    }
+}
+--- partially done
+3. User session => {
+    if logged : 'user can suer full features',
+    else : 'will show only calendar and no actions and buttons where allowed'
+}
+--- done
+
+4. fast api response by reducing size of data => {
+    monthwise: 'filter and send given months data'
+    filtering: 'filter by search',
+    state updatation: 'getting updates in interval'
+} 
+
+5. improve code
